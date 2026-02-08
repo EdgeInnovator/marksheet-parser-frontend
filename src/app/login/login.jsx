@@ -1,6 +1,67 @@
+import z from "zod";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import "./login.css";
+import {api} from "../config/axiosSetup";
 
 export default function Login() {
+  const loginEndpoint ="/auth/login";
+  //creating the schema for login form using zod
+  const loginSchema = z.object({
+    email: z.string().email("Invalid email"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+  });
+
+  const {
+    register,handleSubmit,formState:{errors},reset
+  } = useForm({
+    resolver:zodResolver(loginSchema)
+  });
+
+  console.log(import.meta.env.VITE_API_BASE_URL)
+  const onSubmit = async (data) => {
+    try {
+      console.log('Form submitted:', data);
+    
+      const response = await api({
+        url: loginEndpoint,
+        method: 'POST',
+        data: data
+      })
+      console.log('Login response:', response);
+      if(response.status===200){
+        toast.success('Login successful!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        // Clear form fields after successful submission
+        reset();
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      
+      // Show error toast
+      toast.error('Login failed. Please try again.', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#b9f36a] text-black font-['IBM_Plex_Mono',monospace] flex flex-col">
       {/* Header */}
@@ -40,23 +101,40 @@ export default function Login() {
 
         {/* Right */}
         <section className="flex-1 flex justify-center items-center max-[900px]:mt-10">
-          <div className="bg-white border-[3px] border-black p-10 w-[420px] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+          <form action="" onSubmit={handleSubmit(onSubmit)}>
+            <div className="bg-white border-[3px] border-black p-10 w-[420px] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
             <label className="block text-[11px] font-bold tracking-wide mb-2">
               EMAIL ADDRESS
             </label>
             <input
+              {...register("email")}
               placeholder="you@example.com"
-              className="w-full p-[14px] border-[3px] border-black text-[14px] mb-6 placeholder:text-[#999]"
+              className={`w-full p-[14px] border-[3px] ${
+                errors.email ? 'border-red-500' : 'border-black'
+              } text-[14px] mb-2 placeholder:text-[#999]`}
             />
+            {errors.email && (
+              <p className="text-red-500 text-[11px] mb-6">
+                {errors.email.message}
+              </p>
+            )}
 
             <label className="block text-[11px] font-bold tracking-wide mb-2">
               PASSWORD
             </label>
             <input
+              {...register("password")}
               type="password"
-              placeholder="••••••••"
-              className="w-full p-[14px] border-[3px] border-black text-[14px] mb-6 placeholder:text-[#999]"
+              placeholder="•••••••"
+              className={`w-full p-[14px] border-[3px] ${
+                errors.password ? 'border-red-500' : 'border-black'
+              } text-[14px] mb-2 placeholder:text-[#999]`}
             />
+            {errors.password && (
+              <p className="text-red-500 text-[11px] mb-6">
+                {errors.password.message}
+              </p>
+            )}
 
             <button className="w-full p-[18px] bg-black text-[#b9f36a] font-bold cursor-pointer">
               SUBMIT ↗
@@ -72,6 +150,7 @@ export default function Login() {
               </a>
             </p>
           </div>
+          </form>
         </section>
       </main>
 
