@@ -5,8 +5,11 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import "./login.css";
 import {api} from "../config/axiosSetup";
+import { useNavigate, NavLink } from "react-router-dom";
+import { setCokie } from "../utils/utils";
 
 export default function Login() {
+  const navigate = useNavigate();
   const loginEndpoint ="/auth/login";
   //creating the schema for login form using zod
   const loginSchema = z.object({
@@ -19,8 +22,7 @@ export default function Login() {
   } = useForm({
     resolver:zodResolver(loginSchema)
   });
-
-  console.log(import.meta.env.VITE_API_BASE_URL)
+  
   const onSubmit = async (data) => {
     try {
       console.log('Form submitted:', data);
@@ -32,6 +34,12 @@ export default function Login() {
       })
       console.log('Login response:', response);
       if(response.status===200){
+        // Store access token in cookie for 48 hours
+        if(response.data && response.data.access_token) {
+          setCokie('access_token', response.data.access_token, 2); // 2 days = 48 hours
+          console.log('Access token stored in cookie for 48 hours');
+        }
+        
         toast.success('Login successful!', {
           position: "top-right",
           autoClose: 3000,
@@ -44,6 +52,8 @@ export default function Login() {
         });
         // Clear form fields after successful submission
         reset();
+        // Navigate to dashboard or home page
+        navigate('/');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -71,12 +81,12 @@ export default function Login() {
           M. PARSER
         </div>
 
-        <a
-          href="#"
+        <NavLink
+          to="/signup"
           className="text-[12px] font-semibold no-underline text-black"
         >
           SIGNUP ↗
-        </a>
+        </NavLink>
       </header>
 
       {/* Main */}
@@ -145,9 +155,9 @@ export default function Login() {
 
             <p className="text-center text-[12px] font-semibold">
               DON'T HAVE AN ACCOUNT?{" "}
-              <a href="#" className="underline">
+              <NavLink to="/signup" className="underline">
                 SIGNIN
-              </a>
+              </NavLink>
             </p>
           </div>
           </form>
