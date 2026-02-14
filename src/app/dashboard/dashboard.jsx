@@ -4,6 +4,7 @@ import FileUpload from '../../components/FileUpload';
 import { api } from '../config/axiosSetup';
 import { toast } from 'react-toastify';
 import { getCokie } from '../utils/utils';
+import { Download, Eye, Trash } from 'lucide-react';
 
 // Role-specific components
 const StudentStats = () => (
@@ -113,7 +114,13 @@ const StudentTable = () => (
           <td>
             <span className="bg-[#b9f36a] px-3 py-1 border border-black text-[10px] font-bold">PASSED</span>
           </td>
-          <td>👁 ⬇ 🗑</td>
+          <td>
+            <div className="flex gap-2">
+              <Eye size={16}/>
+              <Download size={16}/>
+              <Trash size={16}/>
+            </div>
+          </td>
         </tr>
         <tr className="border-b border-gray-400">
           <td className="p-4">Chemistry</td>
@@ -122,7 +129,13 @@ const StudentTable = () => (
           <td>
             <span className="bg-[#b9f36a] px-3 py-1 border border-black text-[10px] font-bold">PASSED</span>
           </td>
-          <td>👁 ⬇ 🗑</td>
+          <td>
+            <div className="flex gap-2">
+              <Eye size={16}/>
+              <Download size={16}/>
+              <Trash size={16}/>
+            </div>
+          </td>
         </tr>
         <tr>
           <td className="p-4">Mathematics</td>
@@ -131,7 +144,13 @@ const StudentTable = () => (
           <td>
             <span className="bg-[#b9f36a] px-3 py-1 border border-black text-[10px] font-bold">PASSED</span>
           </td>
-          <td>👁 ⬇ 🗑</td>
+          <td>
+            <div className="flex gap-2">
+              <Eye size={16}/>
+              <Download size={16}/>
+              <Trash size={16}/>
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -161,7 +180,13 @@ const TeacherTable = () => (
           <td>
             <span className="bg-[#b9f36a] px-3 py-1 border border-black text-[10px] font-bold">PARSED</span>
           </td>
-          <td>👁 ⬇ 🗑</td>
+          <td>
+            <div className="flex gap-2">
+              <Eye size={16}/>
+              <Download size={16}/>
+              <Trash size={16}/>
+            </div>
+          </td>
         </tr>
         <tr className="border-b border-gray-400">
           <td className="p-4">Chemistry_2024_Mid.pdf</td>
@@ -170,7 +195,13 @@ const TeacherTable = () => (
           <td>
             <span className="bg-[#b9f36a] px-3 py-1 border border-black text-[10px] font-bold">PARSED</span>
           </td>
-          <td>👁 ⬇ 🗑</td>
+          <td>
+            <div className="flex gap-2">
+              <Eye size={16}/>
+              <Download size={16}/>
+              <Trash size={16}/>
+            </div>
+          </td>
         </tr>
         <tr className="border-b border-gray-400">
           <td className="p-4">Math_2024_Final.pdf</td>
@@ -179,7 +210,13 @@ const TeacherTable = () => (
           <td>
             <span className="bg-yellow-400 px-3 py-1 border border-black text-[10px] font-bold">PROCESSING</span>
           </td>
-          <td>👁 ⬇ 🗑</td>
+          <td>
+            <div className="flex gap-2">
+              <Eye size={16}/>
+              <Download size={16}/>
+              <Trash size={16}/>
+            </div>
+          </td>
         </tr>
         <tr>
           <td className="p-4">English_2024_Sem2.pdf</td>
@@ -188,7 +225,13 @@ const TeacherTable = () => (
           <td>
             <span className="bg-[#b9f36a] px-3 py-1 border border-black text-[10px] font-bold">PARSED</span>
           </td>
-          <td>👁 ⬇ 🗑</td>
+          <td>
+            <div className="flex gap-2">
+              <Eye size={16}/>
+              <Download size={16}/>
+              <Trash size={16}/>
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>
