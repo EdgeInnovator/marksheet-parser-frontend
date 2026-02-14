@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import "./signup.css";
 import {api} from "../config/axiosSetup";
 import { useNavigate, NavLink } from "react-router-dom";
-import { setCokie } from "../utils/utils";
+import { setCokie, getCokie } from "../utils/utils";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -41,6 +41,23 @@ export default function Signup() {
         if(response.data && response.data.access_token) {
           setCokie('access_token', response.data.access_token, 2); // 2 days = 48 hours
           console.log('Access token stored in cookie for 48 hours');
+        }
+        
+        // Fetch user role from /auth/me endpoint
+        try {
+          const userResponse = await api({
+            url: '/auth/me',
+            method: 'GET'
+          });
+          
+          if(userResponse.status === 200 && userResponse.data) {
+            // Store user data in ACTIVE_USER cookie
+            setCokie('ACTIVE_USER', JSON.stringify(userResponse.data), 2);
+            console.log('User data stored in ACTIVE_USER cookie:', userResponse.data);
+          }
+        } catch (userError) {
+          console.error('Failed to fetch user data:', userError);
+          // Still proceed to dashboard even if user data fetch fails
         }
         
         toast.success('Signup successful!', {
