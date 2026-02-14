@@ -57,7 +57,7 @@ export default function Signup() {
         console.log('Resetting form...');
         reset();
         console.log('Form reset completed');
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (error) {
       console.error('Signup error:', error);
