@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 
 // Role-specific components
 const StudentStats = () => (
@@ -201,10 +202,10 @@ export default function Dashboard({ userRole = 'student' }) {
         </div>
 
         <nav className="space-x-8 text-[12px] font-semibold">
-          <a href="#" className="underline text-black no-underline">DASHBOARD</a>
-          <a href="#" className="text-black no-underline">HISTORY</a>
-          <a href="#" className="text-black no-underline">SETTINGS</a>
-          <a href="#" className="text-black no-underline">Logout ↪</a>
+          <NavLink to="/dashboard" className="underline text-black no-underline">DASHBOARD</NavLink>
+          <NavLink to="#" className="text-black no-underline">HISTORY</NavLink>
+          <NavLink to="#" className="text-black no-underline">SETTINGS</NavLink>
+          <NavLink to="/logout" className="text-black no-underline">Logout ↪</NavLink>
         </nav>
       </header>
 
@@ -283,11 +284,11 @@ export default function Dashboard({ userRole = 'student' }) {
       <footer className="flex justify-between px-[60px] py-[30px] border-t-[3px] border-black text-[11px] font-semibold">
         <div> 2024 MARKSHEET PARSER</div>
         <div>
-          <a href="#" className="text-black no-underline">PRIVACY</a>
+          <NavLink to="#" className="text-black no-underline">PRIVACY</NavLink>
           <span className="mx-4">·</span>
-          <a href="#" className="text-black no-underline">TERMS</a>
+          <NavLink to="#" className="text-black no-underline">TERMS</NavLink>
           <span className="mx-4">·</span>
-          <a href="#" className="text-black no-underline">HELP</a>
+          <NavLink to="#" className="text-black no-underline">HELP</NavLink>
         </div>
       </footer>
     </div>
