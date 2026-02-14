@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import FileUpload from '../../components/FileUpload';
+import { api } from '../config/axiosSetup';
+import { toast } from 'react-toastify';
+import { getCokie } from '../utils/utils';
 
 // Role-specific components
 const StudentStats = () => (
@@ -192,6 +196,109 @@ const TeacherTable = () => (
 );
 
 export default function Dashboard({ userRole = 'student' }) {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [isParsing, setIsParsing] = useState(false);
+
+  const handleFileSelect = (file) => {
+    setSelectedFile(file);
+    console.log('File selected for upload:', file);
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      toast.error('Please select a file first', {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "light",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('files', selectedFile);
+
+      const response = await api({
+        url: '/marksheet/upload',
+        method: 'POST',
+        data: formData,
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        toast.success('Marksheet uploaded successfully!', {
+          position: "top-right",
+          autoClose: 3000,
+          theme: "light",
+        });
+        
+        // Store uploaded file info and clear selected file
+        setUploadedFile(selectedFile);
+        setSelectedFile(null);
+        
+        // You can refresh the table data here if needed
+        console.log('Upload response:', response.data);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Upload failed. Please try again.', {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "light",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleParse = async () => {
+    if (!uploadedFile) {
+      toast.error('No file to parse', {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "light",
+      });
+      return;
+    }
+
+    setIsParsing(true);
+
+    try {
+      const response = await api({
+        url: '/marksheet/generate',
+        method: 'POST',
+        data: {
+          filename: uploadedFile.name
+        }
+      });
+
+      if (response.status === 200) {
+        console.log('Parse Results (JSON):', JSON.stringify(response.data, null, 2));
+        
+        toast.success('Marksheet parsed successfully!', {
+          position: "top-right",
+          autoClose: 3000,
+          theme: "light",
+        });
+        
+        // Clear uploaded file after parsing
+        setUploadedFile(null);
+      }
+    } catch (error) {
+      console.error('Parse error:', error);
+      toast.error('Parse failed. Please try again.', {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "light",
+      });
+    } finally {
+      setIsParsing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#b9f36a] text-black font-['IBM_Plex_Mono',monospace] flex flex-col">
       {/* Navbar */}
@@ -237,18 +344,32 @@ export default function Dashboard({ userRole = 'student' }) {
         {/* Upload + Table */}
         <section className="grid grid-cols-3 gap-8 mb-10">
           <div className="bg-white text-black p-10 border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col justify-center items-center text-center">
-            <div className="text-5xl mb-4 text-[#b9f36a]">
-              ⬆
-            </div>
-            <h3 className="font-bold tracking-widest text-[14px]">
-              UPLOAD MARKSHEET
-            </h3>
-            <p className="text-[11px] mt-2">
-              Upload your marksheet to get detailed reports and analysis
-            </p>
-            <button className="mt-6 bg-[#b9f36a] text-black px-6 py-3 font-bold border-[2px] border-black">
-              CHOOSE FILE ↗
-            </button>
+            <FileUpload onFileSelect={handleFileSelect} disabled={isUploading || isParsing} />
+            
+            {selectedFile && (
+              <button
+                onClick={handleUpload}
+                disabled={isUploading}
+                className="mt-6 w-full bg-black text-[#b9f36a] px-6 py-3 font-bold border-[2px] border-black hover:bg-[#b9f36a] hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isUploading ? 'UPLOADING...' : 'UPLOAD MARKSHEET ↗'}
+              </button>
+            )}
+            
+            {uploadedFile && (
+              <div className="mt-6 w-full">
+                <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 text-[10px] mb-4">
+                  ✓ File uploaded: {uploadedFile.name}
+                </div>
+                <button
+                  onClick={handleParse}
+                  disabled={isParsing}
+                  className="w-full bg-blue-600 text-white px-6 py-3 font-bold border-[2px] border-blue-600 hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isParsing ? 'PARSING...' : 'PARSE MARKSHEET'}
+                </button>
+              </div>
+            )}
           </div>
 
           {userRole === 'student' ? <StudentTable /> : <TeacherTable />}
