@@ -116,11 +116,40 @@ export default function Dashboard({ userRole = 'student' }) {
         toast.success('Marksheet parsed successfully!', {
           position: "top-right",
           autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
           theme: "light",
         });
         
         // Clear uploaded file after parsing
         setUploadedFile(null);
+        
+        // Refresh marksheets list to show newly parsed data
+        if (typeof window.fetchUserUploads === 'function') {
+          window.fetchUserUploads();
+        }
+        
+        // Clear uploaded file after parsing
+        setUploadedFile(null);
+        
+        // Refresh marksheets list to show newly parsed data
+        if (typeof window.fetchUserUploads === 'function') {
+          window.fetchUserUploads();
+        }
+        
+        toast.success('Marksheet parsed successfully!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
       }
     } catch (error) {
       // Show more detailed error message
