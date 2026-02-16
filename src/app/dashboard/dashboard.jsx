@@ -71,6 +71,11 @@ export default function Dashboard({ userRole = 'student' }) {
           savedName: savedFilename
         });
         setSelectedFile(null);
+        
+        // Refresh the marksheets list to show the newly uploaded file
+        if (typeof window.fetchUserUploads === 'function') {
+          window.fetchUserUploads();
+        }
       }
     } catch (error) {
       console.error('Upload error:', error);

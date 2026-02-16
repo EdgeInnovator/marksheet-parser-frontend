@@ -1,19 +1,44 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { deleteCookie } from '../utils/utils';
+import { api } from '../config/axiosSetup';
+import { toast } from 'react-toastify';
 
 export default function Logout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Delete both access token and user data cookies
-    deleteCookie('access_token');
-    deleteCookie('ACTIVE_USER');
-    
-    console.log('Logged out successfully - cleared all user cookies');
-    
-    // Redirect to login page
-    navigate('/login');
+    const handleLogout = async () => {
+      try {
+        // Call backend logout endpoint to invalidate session
+        await api({
+          url: '/logout',
+          method: 'POST'
+        });
+        
+        console.log('Server logout successful');
+      } catch (error) {
+        console.error('Server logout failed:', error);
+        // Continue with local logout even if server logout fails
+      } finally {
+        // Delete both access token and user data cookies
+        deleteCookie('access_token');
+        deleteCookie('ACTIVE_USER');
+        
+        toast.success('Logged out successfully', {
+          position: "top-right",
+          autoClose: 2000,
+          theme: "light",
+        });
+        
+        console.log('Logged out successfully - cleared all user cookies');
+        
+        // Redirect to login page
+        navigate('/login');
+      }
+    };
+
+    handleLogout();
   }, [navigate]);
 
   return (
