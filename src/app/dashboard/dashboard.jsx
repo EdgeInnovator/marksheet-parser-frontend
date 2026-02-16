@@ -53,12 +53,24 @@ export default function Dashboard({ userRole = 'student' }) {
           theme: "light",
         });
         
-        // Store uploaded file info and clear selected file
-        setUploadedFile(selectedFile);
-        setSelectedFile(null);
+        // Try different possible response structures
+        let savedFilename = selectedFile.name; // fallback to original
         
-        // You can refresh the table data here if needed
-        console.log('Upload response:', response.data);
+        if (response.data?.files?.[0]?.saved_filename) {
+          savedFilename = response.data.files[0].saved_filename;
+        } else if (response.data?.files?.[0]?.filename) {
+          savedFilename = response.data.files[0].filename;
+        } else if (response.data?.filename) {
+          savedFilename = response.data.filename;
+        } else if (response.data?.saved_filename) {
+          savedFilename = response.data.saved_filename;
+        }
+        
+        setUploadedFile({
+          ...selectedFile,
+          savedName: savedFilename
+        });
+        setSelectedFile(null);
       }
     } catch (error) {
       console.error('Upload error:', error);
@@ -85,17 +97,17 @@ export default function Dashboard({ userRole = 'student' }) {
     setIsParsing(true);
 
     try {
+      const filenameToUse = uploadedFile.savedName || uploadedFile.name;
+      
       const response = await api({
-        url: '/marksheet/generate',
+        url: '/marksheet/parse',
         method: 'POST',
         data: {
-          filename: uploadedFile.name
+          filename: filenameToUse
         }
       });
 
       if (response.status === 200) {
-        console.log('Parse Results (JSON):', JSON.stringify(response.data, null, 2));
-        
         toast.success('Marksheet parsed successfully!', {
           position: "top-right",
           autoClose: 3000,
@@ -106,10 +118,11 @@ export default function Dashboard({ userRole = 'student' }) {
         setUploadedFile(null);
       }
     } catch (error) {
-      console.error('Parse error:', error);
-      toast.error('Parse failed. Please try again.', {
+      // Show more detailed error message
+      const errorMessage = error.response?.data?.detail || error.message || 'Unknown error';
+      toast.error(`Parse failed: ${errorMessage}`, {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 5000,
         theme: "light",
       });
     } finally {
