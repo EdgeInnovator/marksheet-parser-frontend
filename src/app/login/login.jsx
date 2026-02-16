@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import "./login.css";
 import {api} from "../config/axiosSetup";
 import { useNavigate, NavLink } from "react-router-dom";
-import { setCokie } from "../utils/utils";
+import { setCokie, getCokie } from "../utils/utils";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -40,6 +40,23 @@ export default function Login() {
           console.log('Access token stored in cookie for 48 hours');
         }
         
+        // Fetch user role from /auth/me endpoint
+        try {
+          const userResponse = await api({
+            url: '/auth/me',
+            method: 'GET'
+          });
+          
+          if(userResponse.status === 200 && userResponse.data) {
+            // Store user data in ACTIVE_USER cookie
+            setCokie('ACTIVE_USER', JSON.stringify(userResponse.data), 2);
+            console.log('User data stored in ACTIVE_USER cookie:', userResponse.data);
+          }
+        } catch (userError) {
+          console.error('Failed to fetch user data:', userError);
+          // Still proceed to dashboard even if user data fetch fails
+        }
+        
         toast.success('Login successful!', {
           position: "top-right",
           autoClose: 3000,
@@ -53,7 +70,7 @@ export default function Login() {
         // Clear form fields after successful submission
         reset();
         // Navigate to dashboard or home page
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (error) {
       console.error('Login error:', error);
