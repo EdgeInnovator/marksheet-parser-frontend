@@ -127,7 +127,8 @@ export default function Dashboard({ userRole = 'student' }) {
         </div>
 
         <nav className="space-x-8 text-[12px] font-semibold">
-          <NavLink to="/dashboard" className="underline text-black no-underline">DASHBOARD</NavLink>
+          <NavLink to="/dashboard" className="text-black no-underline">DASHBOARD</NavLink>
+          <NavLink to="/about-us" className="underline text-black no-underline">ABOUT US</NavLink>
           <NavLink to="#" className="text-black no-underline">HISTORY</NavLink>
           <NavLink to="#" className="text-black no-underline">SETTINGS</NavLink>
           <NavLink to="/logout" className="text-black no-underline">Logout ↪</NavLink>
@@ -221,13 +222,9 @@ export default function Dashboard({ userRole = 'student' }) {
 
       {/* Footer */}
       <footer className="flex justify-between px-[60px] py-[30px] border-t-[3px] border-black text-[11px] font-semibold">
-        <div> 2024 MARKSHEET PARSER</div>
+        <div> 2026 MARKSHEET PARSER</div>
         <div>
-          <NavLink to="#" className="text-black no-underline">PRIVACY</NavLink>
-          <span className="mx-4">·</span>
-          <NavLink to="#" className="text-black no-underline">TERMS</NavLink>
-          <span className="mx-4">·</span>
-          <NavLink to="#" className="text-black no-underline">HELP</NavLink>
+          <NavLink to="/about-us" className="text-black no-underline">ABOUT US</NavLink>
         </div>
       </footer>
     </div>

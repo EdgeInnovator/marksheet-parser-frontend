@@ -4,6 +4,7 @@ import Login from './app/login/login'
 import Signup from './app/signup/signup'
 import Dashboard from './app/dashboard/dashboard'
 import Logout from './app/logout/logout'
+import About from './app/about/About'
 import ProtectedRoute from './components/ProtectedRoute'
 import { getCokie } from './app/utils/utils'
 function App() {
@@ -37,6 +38,11 @@ function App() {
     <Route path="/dashboard" element={
       <ProtectedRoute>
         <Dashboard userRole={userRole} />
+      </ProtectedRoute>
+    } />
+    <Route path="/about-us" element={
+      <ProtectedRoute>
+        <About />
       </ProtectedRoute>
     } />
     <Route path="/logout" element={<Logout />} />
