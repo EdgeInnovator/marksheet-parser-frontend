@@ -4,12 +4,15 @@ import { api } from '../config/axiosSetup';
 import { toast } from 'react-toastify';
 import { getCokie } from '../utils/utils';
 import ViewMarksheetModal from '../../components/ViewMarksheetModal';
+import DeleteConfirmModal from '../../components/DeleteConfirmModal';
 
 export default function StudentTable() {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState(null);
 
   const fetchUserUploads = async () => {
     try {
@@ -88,14 +91,17 @@ export default function StudentTable() {
     setSelectedFile(null);
   };
 
-  const handleDelete = async (filename) => {
-    if (!window.confirm(`Are you sure you want to delete ${filename}?`)) {
-      return;
-    }
+  const handleDelete = (filename) => {
+    setFileToDelete(filename);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!fileToDelete) return;
     
     try {
       await api({
-        url: `/files/${filename}`,
+        url: `/files/${fileToDelete}`,
         method: 'DELETE'
       });
       
@@ -104,7 +110,15 @@ export default function StudentTable() {
     } catch (error) {
       console.error('Delete error:', error);
       toast.error('Failed to delete file');
+    } finally {
+      setIsDeleteModalOpen(false);
+      setFileToDelete(null);
     }
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setFileToDelete(null);
   };
 
   useEffect(() => {
@@ -188,11 +202,13 @@ export default function StudentTable() {
                       onClick={() => handleView(file.filename)}
                       title="View details"
                     />
-                    <Download 
-                      size={16} 
-                      onClick={() => handleDownload(file.filename)}
-                      title="Download file"
-                    />
+                    {file.size && (
+                      <Download 
+                        size={16} 
+                        onClick={() => handleDownload(file.filename)}
+                        title="Download file"
+                      />
+                    )}
                     <Trash 
                       size={16} 
                       onClick={() => handleDelete(file.filename)}
@@ -211,6 +227,13 @@ export default function StudentTable() {
         isOpen={isModalOpen}
         onClose={closeModal}
         filename={selectedFile}
+      />
+      
+      <DeleteConfirmModal 
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDelete}
+        filename={fileToDelete}
       />
     </div>
   );
