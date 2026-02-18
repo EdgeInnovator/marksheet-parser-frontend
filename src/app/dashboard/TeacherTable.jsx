@@ -3,10 +3,13 @@ import { Download, Eye, Trash } from 'lucide-react';
 import { api } from '../config/axiosSetup';
 import { toast } from 'react-toastify';
 import { getCokie } from '../utils/utils';
+import ViewMarksheetModal from '../../components/ViewMarksheetModal';
 
 export default function TeacherTable() {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchUserUploads = async () => {
     try {
@@ -58,21 +61,14 @@ export default function TeacherTable() {
     }
   };
 
-  const handleView = async (filename) => {
-    try {
-      const response = await api({
-        url: `/files/view/${filename}`,
-        method: 'GET'
-      });
-      
-      // Show file metadata in a modal or alert
-      const fileData = response.data.data;
-      
-      toast.info(`File: ${fileData.filename}\nSize: ${(fileData.size / 1024 / 1024).toFixed(2)} MB\nModified: ${new Date(fileData.upload_date).toLocaleDateString()}\nStatus: ${fileData.parse_status}\nStudent: ${fileData.parsed_data?.student_name || 'N/A'}`);
-    } catch (error) {
-      console.error('View error:', error);
-      toast.error('Failed to view file details');
-    }
+  const handleView = (filename) => {
+    setSelectedFile(filename);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedFile(null);
   };
 
   const handleDelete = async (filename) => {
@@ -190,6 +186,11 @@ export default function TeacherTable() {
           </tbody>
         </table>
       )}
+      <ViewMarksheetModal 
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        filename={selectedFile}
+      />
     </div>
   );
 }
