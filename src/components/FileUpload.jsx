@@ -1,11 +1,21 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { validatePDFFile, formatFileSize } from '../app/utils/fileUpload';
 
-export default function FileUpload({ onFileSelect, disabled = false }) {
+export default function FileUpload({ onFileSelect, disabled = false, clearFile = false }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
+
+  // Clear internal state when clearFile prop changes
+  useEffect(() => {
+    if (clearFile) {
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  }, [clearFile]);
 
   const handleFileSelect = (file) => {
     // Validate file
@@ -59,18 +69,21 @@ export default function FileUpload({ onFileSelect, disabled = false }) {
   };
 
   const handleClick = () => {
-    if (!disabled) {
-      fileInputRef.current?.click();
+    if (!disabled && fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
-  const clearFile = () => {
-    setSelectedFile(null);
+  const clearFileInput = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    onFileSelect(null);
   };
+
+  // Make clearFileInput available globally
+  if (typeof window !== 'undefined') {
+    window.clearFileInput = clearFileInput;
+  }
 
   return (
     <div className="w-full">

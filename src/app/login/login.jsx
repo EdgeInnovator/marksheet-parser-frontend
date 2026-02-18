@@ -25,19 +25,16 @@ export default function Login() {
   
   const onSubmit = async (data) => {
     try {
-      console.log('Form submitted:', data);
-    
       const response = await api({
         url: loginEndpoint,
         method: 'POST',
         data: data
       })
-      console.log('Login response:', response);
+      
       if(response.status===200){
         // Store access token in cookie for 48 hours
         if(response.data && response.data.access_token) {
           setCokie('access_token', response.data.access_token, 2); // 2 days = 48 hours
-          console.log('Access token stored in cookie for 48 hours');
         }
         
         // Fetch user role from /auth/me endpoint
@@ -50,7 +47,6 @@ export default function Login() {
           if(userResponse.status === 200 && userResponse.data) {
             // Store user data in ACTIVE_USER cookie
             setCokie('ACTIVE_USER', JSON.stringify(userResponse.data), 2);
-            console.log('User data stored in ACTIVE_USER cookie:', userResponse.data);
           }
         } catch (userError) {
           console.error('Failed to fetch user data:', userError);

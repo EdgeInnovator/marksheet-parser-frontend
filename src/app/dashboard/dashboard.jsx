@@ -53,12 +53,38 @@ export default function Dashboard({ userRole = 'student' }) {
           theme: "light",
         });
         
-        // Store uploaded file info and clear selected file
-        setUploadedFile(selectedFile);
+        // Try different possible response structures
+        let savedFilename = selectedFile.name; // fallback to original
+        
+        if (response.data?.files?.[0]?.saved_filename) {
+          savedFilename = response.data.files[0].saved_filename;
+        } else if (response.data?.files?.[0]?.filename) {
+          savedFilename = response.data.files[0].filename;
+        } else if (response.data?.filename) {
+          savedFilename = response.data.filename;
+        } else if (response.data?.saved_filename) {
+          savedFilename = response.data.saved_filename;
+        }
+        
+        setUploadedFile({
+          ...selectedFile,
+          savedName: savedFilename
+        });
         setSelectedFile(null);
         
-        // You can refresh the table data here if needed
-        console.log('Upload response:', response.data);
+        // Clear the file input to allow selecting new files
+        if (typeof window.clearFileInput === 'function') {
+          window.clearFileInput();
+        }
+        
+        // Refresh marksheets list to show newly uploaded file
+        if (typeof window.fetchUserUploads === 'function') {
+          setTimeout(() => {
+            window.fetchUserUploads();
+          }, 1000);
+        } else {
+          console.warn('window.fetchUserUploads is not available');
+        }
       }
     } catch (error) {
       console.error('Upload error:', error);
@@ -85,31 +111,46 @@ export default function Dashboard({ userRole = 'student' }) {
     setIsParsing(true);
 
     try {
+      const filenameToUse = uploadedFile.savedName || uploadedFile.name;
+      
       const response = await api({
-        url: '/marksheet/generate',
+        url: '/marksheet/parse',
         method: 'POST',
         data: {
-          filename: uploadedFile.name
+          filename: filenameToUse
         }
       });
 
       if (response.status === 200) {
-        console.log('Parse Results (JSON):', JSON.stringify(response.data, null, 2));
+        console.log('=== PARSE SUCCESSFUL ===');
+        console.log('Clearing uploadedFile state...');
         
         toast.success('Marksheet parsed successfully!', {
           position: "top-right",
           autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
           theme: "light",
         });
         
-        // Clear uploaded file after parsing
+        // Clear uploaded file after parsing to allow new uploads
         setUploadedFile(null);
+        console.log('uploadedFile state cleared');
+        
+        // Refresh marksheets list to show newly parsed data
+        if (typeof window.fetchUserUploads === 'function') {
+          window.fetchUserUploads();
+        }
       }
     } catch (error) {
-      console.error('Parse error:', error);
-      toast.error('Parse failed. Please try again.', {
+      // Show more detailed error message
+      const errorMessage = error.response?.data?.detail || error.message || 'Unknown error';
+      toast.error(`Parse failed: ${errorMessage}`, {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 5000,
         theme: "light",
       });
     } finally {
@@ -163,7 +204,7 @@ export default function Dashboard({ userRole = 'student' }) {
         {/* Upload + Table */}
         <section className="grid grid-cols-3 gap-8 mb-10">
           <div className="bg-white text-black p-10 border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col justify-center items-center text-center">
-            <FileUpload onFileSelect={handleFileSelect} disabled={isUploading || isParsing} />
+            <FileUpload onFileSelect={handleFileSelect} disabled={isUploading || isParsing} clearFile={!uploadedFile} />
             
             {selectedFile && (
               <button
@@ -180,13 +221,25 @@ export default function Dashboard({ userRole = 'student' }) {
                 <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 text-[10px] mb-4">
                   ✓ File uploaded: {uploadedFile.name}
                 </div>
-                <button
-                  onClick={handleParse}
-                  disabled={isParsing}
-                  className="w-full bg-blue-600 text-white px-6 py-3 font-bold border-[2px] border-blue-600 hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isParsing ? 'PARSING...' : 'PARSE MARKSHEET'}
-                </button>
+                <div className="flex gap-2 mb-4">
+                  <button
+                    onClick={handleParse}
+                    disabled={isParsing}
+                    className="flex-1 bg-blue-600 text-white px-6 py-3 font-bold border-[2px] border-blue-600 hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isParsing ? 'PARSING...' : 'PARSE MARKSHEET'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      console.log('Manual reset clicked');
+                      setUploadedFile(null);
+                      toast.info('Upload section reset');
+                    }}
+                    className="bg-gray-600 text-white px-4 py-3 font-bold border-[2px] border-gray-600 hover:bg-gray-700 transition-colors"
+                  >
+                    🔄
+                  </button>
+                </div>
               </div>
             )}
           </div>
