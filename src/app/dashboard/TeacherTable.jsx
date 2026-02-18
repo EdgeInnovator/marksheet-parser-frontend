@@ -4,12 +4,15 @@ import { api } from '../config/axiosSetup';
 import { toast } from 'react-toastify';
 import { getCokie } from '../utils/utils';
 import ViewMarksheetModal from '../../components/ViewMarksheetModal';
+import DeleteConfirmModal from '../../components/DeleteConfirmModal';
 
 export default function TeacherTable() {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState(null);
 
   const fetchUserUploads = async () => {
     try {
@@ -71,14 +74,17 @@ export default function TeacherTable() {
     setSelectedFile(null);
   };
 
-  const handleDelete = async (filename) => {
-    if (!window.confirm(`Are you sure you want to delete ${filename}?`)) {
-      return;
-    }
+  const handleDelete = (filename) => {
+    setFileToDelete(filename);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!fileToDelete) return;
     
     try {
       await api({
-        url: `/files/${filename}`,
+        url: `/files/${fileToDelete}`,
         method: 'DELETE'
       });
       
@@ -87,7 +93,15 @@ export default function TeacherTable() {
     } catch (error) {
       console.error('Delete error:', error);
       toast.error('Failed to delete file');
+    } finally {
+      setIsDeleteModalOpen(false);
+      setFileToDelete(null);
     }
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setFileToDelete(null);
   };
 
   const handleManualRefresh = async () => {
@@ -190,6 +204,13 @@ export default function TeacherTable() {
         isOpen={isModalOpen}
         onClose={closeModal}
         filename={selectedFile}
+      />
+      
+      <DeleteConfirmModal 
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDelete}
+        filename={fileToDelete}
       />
     </div>
   );
