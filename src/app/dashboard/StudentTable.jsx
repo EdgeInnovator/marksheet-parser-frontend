@@ -27,10 +27,11 @@ export default function StudentTable() {
       });
       
       console.log('Response status:', response.status);
+      console.log('Full response:', response);
       console.log('Response data:', response.data);
       
       // Handle both database records and file system responses
-      const filesData = response.data.data || [];
+      const filesData = response.data?.data || [];
       console.log('Files data:', filesData);
       console.log('Files count:', filesData.length);
       setFiles(filesData);
@@ -66,7 +67,7 @@ export default function StudentTable() {
       
       toast.success('File downloaded successfully');
       
-      // Refresh the file list to update the display
+      // Refresh file list to update display
       fetchUserUploads();
     } catch (error) {
       console.error('Download error:', error);
@@ -76,19 +77,13 @@ export default function StudentTable() {
 
   const handleView = async (filename) => {
     try {
-      console.log('=== VIEWING FILE ===');
-      console.log('Filename:', filename);
-      
       const response = await api({
         url: `/files/view/${filename}`,
         method: 'GET'
       });
       
-      console.log('View response status:', response.status);
-      console.log('View response data:', response.data);
-      
       // Show file metadata in a modal or alert
-      const fileData = response.data.data;
+      const fileData = response.data;
       
       toast.info(`File: ${fileData.filename}\nSize: ${(fileData.size / 1024 / 1024).toFixed(2)} MB\nModified: ${new Date(fileData.upload_date).toLocaleDateString()}\nStatus: ${fileData.parse_status}\nStudent: ${fileData.parsed_data?.student_name || 'N/A'}`);
     } catch (error) {
@@ -113,7 +108,7 @@ export default function StudentTable() {
       });
       
       toast.success('File deleted successfully');
-      fetchUserUploads(); // Refresh the list
+      fetchUserUploads(); // Refresh list
     } catch (error) {
       console.error('Delete error:', error);
       toast.error('Failed to delete file');
@@ -122,7 +117,17 @@ export default function StudentTable() {
 
   useEffect(() => {
     fetchUserUploads();
+    
+    // Make function available globally for dashboard to call
+    window.fetchUserUploads = fetchUserUploads;
   }, []);
+
+  // Add manual refresh button
+  const handleManualRefresh = () => {
+    console.log('=== MANUAL REFRESH TRIGGERED ===');
+    fetchUserUploads();
+    toast.info('Table refreshed manually');
+  };
 
   if (loading) {
     return (
@@ -135,12 +140,18 @@ export default function StudentTable() {
         </div>
       </div>
     );
-  };
+  }
 
   return (
     <div className="col-span-2 bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-      <div className="border-b-[3px] border-black p-4 font-bold text-[11px] tracking-wide">
-        MY RESULTS
+      <div className="border-b-[3px] border-black p-4 font-bold text-[11px] tracking-wide flex justify-between items-center">
+        <span>MY RESULTS</span>
+        <button
+          onClick={handleManualRefresh}
+          className="bg-blue-600 text-white px-3 py-1 text-[10px] font-bold border-[2px] border-blue-600 hover:bg-blue-700 transition-colors"
+        >
+          🔄 Refresh
+        </button>
       </div>
       
       {files.length === 0 ? (

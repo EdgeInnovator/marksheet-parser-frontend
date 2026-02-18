@@ -94,6 +94,11 @@ export default function TeacherTable() {
     }
   };
 
+  const handleManualRefresh = async () => {
+    setLoading(true);
+    await fetchUserUploads();
+  };
+
   useEffect(() => {
     fetchUserUploads();
   }, []);
@@ -113,8 +118,14 @@ export default function TeacherTable() {
 
   return (
     <div className="col-span-2 bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-      <div className="border-b-[3px] border-black p-4 font-bold text-[11px] tracking-wide">
-        RECENT MARKSHEETS
+      <div className="border-b-[3px] border-black p-4 font-bold text-[11px] tracking-wide flex justify-between items-center">
+        <span>RECENT MARKSHEETS</span>
+        <button
+          onClick={handleManualRefresh}
+          className="bg-blue-600 text-white px-3 py-1 text-[10px] font-bold border-[2px] border-blue-600 hover:bg-blue-700 transition-colors"
+        >
+          🔄 Refresh
+        </button>
       </div>
       
       {files.length === 0 ? (
