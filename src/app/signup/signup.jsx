@@ -28,19 +28,16 @@ export default function Signup() {
 
   const onSubmit = async (data) => {
     try {
-      console.log('Form submitted:', data);
     
       const response = await api({
         url: signupEndpoint,
         method: 'POST',
         data: data
       })
-      console.log('Signup response:', response);
       if(response.status === 201){
         // Store access token in cookie for 48 hours
         if(response.data && response.data.access_token) {
           setCokie('access_token', response.data.access_token, 2); // 2 days = 48 hours
-          console.log('Access token stored in cookie for 48 hours');
         }
         
         // Fetch user role from /auth/me endpoint
@@ -53,7 +50,6 @@ export default function Signup() {
           if(userResponse.status === 200 && userResponse.data) {
             // Store user data in ACTIVE_USER cookie
             setCokie('ACTIVE_USER', JSON.stringify(userResponse.data), 2);
-            console.log('User data stored in ACTIVE_USER cookie:', userResponse.data);
           }
         } catch (userError) {
           console.error('Failed to fetch user data:', userError);
@@ -71,9 +67,7 @@ export default function Signup() {
           theme: "light",
         });
         // Clear form fields after successful submission
-        console.log('Resetting form...');
         reset();
-        console.log('Form reset completed');
         navigate('/dashboard');
       }
     } catch (error) {

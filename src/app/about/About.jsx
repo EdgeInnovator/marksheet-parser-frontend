@@ -16,7 +16,7 @@ export default function About() {
           <NavLink to="/about-us" className="underline text-black no-underline">ABOUT US</NavLink>
           <NavLink to="#" className="text-black no-underline">HISTORY</NavLink>
           <NavLink to="#" className="text-black no-underline">SETTINGS</NavLink>
-          <NavLink to="/logout" className="text-black no-underline">Logout ↪</NavLink>
+          <NavLink to="/logout" className="text-black no-underline">Logout</NavLink>
         </nav>
       </header>
 

@@ -15,8 +15,6 @@ export default function Logout() {
           url: '/logout',
           method: 'POST'
         });
-        
-        console.log('Server logout successful');
       } catch (error) {
         console.error('Server logout failed:', error);
         // Continue with local logout even if server logout fails
@@ -31,7 +29,6 @@ export default function Logout() {
           theme: "light",
         });
         
-        console.log('Logged out successfully - cleared all user cookies');
         
         // Redirect to login page
         navigate('/login');
