@@ -20,9 +20,6 @@ export default function StudentTable() {
       const activeUser = getCokie('ACTIVE_USER');
       const userData = activeUser ? JSON.parse(activeUser) : null;
       
-      console.log('=== FETCHING USER UPLOADS ===');
-      console.log('User data:', userData);
-      console.log('User ID:', userData?.id);
       
       const response = await api({
         url: '/marksheet/uploaded-files',
@@ -31,22 +28,12 @@ export default function StudentTable() {
           user_id: userData?.id
         }
       });
-      
-      console.log('Response status:', response.status);
-      console.log('Full response:', response);
-      console.log('Response data:', response.data);
+    
       
       // Handle both database records and file system responses
       const filesData = response.data?.data || [];
-      console.log('Files data:', filesData);
-      console.log('Files count:', filesData.length);
       setFiles(filesData);
     } catch (error) {
-      console.error('=== FETCH ERROR ===');
-      console.error('Error:', error);
-      console.error('Error response:', error.response);
-      console.error('Error status:', error.response?.status);
-      console.error('Error data:', error.response?.data);
       toast.error(`Failed to load uploaded files: ${error.response?.data?.detail || error.message}`);
     } finally {
       setLoading(false);
@@ -130,7 +117,6 @@ export default function StudentTable() {
 
   // Add manual refresh button
   const handleManualRefresh = () => {
-    console.log('=== MANUAL REFRESH TRIGGERED ===');
     fetchUserUploads();
     toast.info('Table refreshed manually');
   };
@@ -169,8 +155,8 @@ export default function StudentTable() {
           <thead className="border-b-[3px] border-black">
             <tr className="text-left">
               <th className="p-4">FILENAME</th>
-              <th>SIZE</th>
-              <th>DATE</th>
+              <th className='hidden md:table-cell'>SIZE</th>
+              <th className='hidden md:table-cell'>DATE</th>
               <th>STATUS</th>
               <th>ACTIONS</th>
             </tr>
@@ -179,10 +165,10 @@ export default function StudentTable() {
             {files.map((file, index) => (
               <tr key={index} className="border-b border-gray-400">
                 <td className="p-4 font-medium">{file.filename}</td>
-                <td>
+                <td className='hidden md:table-cell'>
                   {file.size ? `${(file.size / 1024).toFixed(1)} KB` : 'Database record'}
                 </td>
-                <td>
+                <td className='hidden md:table-cell'>
                   {file.modified 
                     ? new Date(file.modified).toLocaleDateString()
                     : file.created_at 
