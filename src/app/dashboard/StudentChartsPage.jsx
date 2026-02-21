@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { api } from "../config/axiosSetup";
 import { getCokie } from "../utils/utils";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 import StudentCharts from "./charts/StudentCharts";
 
 export default function StudentChartsPage() {
@@ -50,28 +52,16 @@ export default function StudentChartsPage() {
     <div className="min-h-screen bg-[#b9f36a] text-black font-['IBM_Plex_Mono',monospace] flex flex-col">
       
       {/* Navbar */}
-      <header className="px-[60px] py-[40px] flex justify-between items-center">
-        <div className="flex items-center gap-3 font-bold">
-          <span className="w-8 h-8 bg-black block" />
-          M. PARSER
-        </div>
+      <Navbar userRole={userRole} />
 
-        <nav className="space-x-8 text-[12px] font-semibold">
-          <NavLink to="/dashboard">DASHBOARD</NavLink>
-          <NavLink to="/student-charts">CHARTS</NavLink>
-          <NavLink to="/about-us">ABOUT US</NavLink>
-          <NavLink to="/logout">LOGOUT</NavLink>
-        </nav>
-      </header>
-
-      <main className="flex-1 px-[60px] py-[40px]">
+      <main className="flex-1 px-[20px] sm:px-[40px] py-[20px] sm:py-[40px]">
 
         {/* Title */}
         <section className="mb-10">
-          <h1 className="text-[80px] leading-[0.9] font-extrabold">
+          <h1 className="text-[48px] sm:text-[64px] lg:text-[80px] leading-[0.9] font-extrabold">
             MY <br />CHARTS<span>.</span>
           </h1>
-          <p className="text-[20px] font-bold mt-4">
+          <p className="text-[16px] sm:text-[18px] lg:text-[20px] font-bold mt-4">
             VISUALIZE MY PROGRESS.
           </p>
         </section>
@@ -83,9 +73,8 @@ export default function StudentChartsPage() {
 
       </main>
 
-      <footer className="px-[60px] py-[30px] border-t-[3px] border-black text-[11px] font-semibold">
-        2026 MARKSHEET PARSER
-      </footer>
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

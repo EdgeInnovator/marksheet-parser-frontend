@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import FileUpload from "../../components/FileUpload";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 import { api } from "../config/axiosSetup";
 import { toast } from "react-toastify";
 import { getCokie } from "../utils/utils";
@@ -84,7 +86,12 @@ export default function Dashboard({ userRole = "student" }) {
 
       setSelectedFile(null);
     } catch (error) {
-      toast.error("Upload failed. Please try again.");
+      console.error("Upload error:", error);
+      const errorMessage = error.response?.data?.detail || 
+                          error.response?.data?.message || 
+                          error.message || 
+                          "Upload failed. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setIsUploading(false);
     }
@@ -109,8 +116,12 @@ export default function Dashboard({ userRole = "student" }) {
       toast.success("Marksheet parsed successfully!");
       setUploadedFile(null);
     } catch (error) {
+      console.error("Parse error:", error);
       const errorMessage =
-        error.response?.data?.detail || "Parse failed";
+        error.response?.data?.detail || 
+        error.response?.data?.message || 
+        error.message || 
+        "Parse failed";
       toast.error(errorMessage);
     } finally {
       setIsParsing(false);
@@ -121,30 +132,16 @@ export default function Dashboard({ userRole = "student" }) {
     <div className="min-h-screen bg-[#b9f36a] text-black font-['IBM_Plex_Mono',monospace] flex flex-col">
       
       {/* Navbar */}
-      <header className="px-[60px] py-[40px] flex justify-between items-center">
-        <div className="flex items-center gap-3 font-bold">
-          <span className="w-8 h-8 bg-black block" />
-          M. PARSER
-        </div>
+      <Navbar userRole={userRole} />
 
-        <nav className="space-x-8 text-[12px] font-semibold">
-          <NavLink to="/dashboard">DASHBOARD</NavLink>
-          {userRole === "student" && (
-            <NavLink to="/student-charts">CHARTS</NavLink>
-          )}
-          <NavLink to="/about-us">ABOUT US</NavLink>
-          <NavLink to="/logout">LOGOUT</NavLink>
-        </nav>
-      </header>
-
-      <main className="flex-1 px-[60px] py-[40px]">
+      <main className="flex-1 px-[20px] sm:px-[40px] py-[20px] sm:py-[40px]">
 
         {/* Title */}
         <section className="mb-10">
-          <h1 className="text-[80px] leading-[0.9] font-extrabold">
+          <h1 className="text-[48px] sm:text-[64px] lg:text-[80px] leading-[0.9] font-extrabold">
             DASH <br />BOARD<span>.</span>
           </h1>
-          <p className="text-[20px] font-bold mt-4">
+          <p className="text-[16px] sm:text-[18px] lg:text-[20px] font-bold mt-4">
             {userRole === "student"
               ? "TRACK MY PROGRESS."
               : "ANALYZE SMARTER."}
@@ -152,7 +149,7 @@ export default function Dashboard({ userRole = "student" }) {
         </section>
 
         {/* Stats */}
-        <section className="grid grid-cols-4 gap-8 mb-10">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
           {userRole === "student" ? (
             <StudentStats />
           ) : (
@@ -161,59 +158,60 @@ export default function Dashboard({ userRole = "student" }) {
         </section>
 
         {/* Upload + Table */}
-        <section className="grid grid-cols-3 gap-8 mb-10">
+        <section className="mb-10">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="bg-white p-6 sm:p-8 lg:p-10 border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center">
+              <FileUpload
+                onFileSelect={handleFileSelect}
+                disabled={isUploading || isParsing}
+              />
 
-          <div className="bg-white p-10 border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center">
-            <FileUpload
-              onFileSelect={handleFileSelect}
-              disabled={isUploading || isParsing}
-            />
+              {selectedFile && (
+                <button
+                  onClick={handleUpload}
+                  disabled={isUploading}
+                  className="mt-4 w-full bg-black text-[#b9f36a] px-4 py-3 sm:px-6 font-bold border-[2px] border-black text-sm sm:text-base"
+                >
+                  {isUploading ? "UPLOADING..." : "UPLOAD MARKSHEET"}
+                </button>
+              )}
 
-            {selectedFile && (
-              <button
-                onClick={handleUpload}
-                disabled={isUploading}
-                className="mt-4 w-full bg-black text-[#b9f36a] px-6 py-3 font-bold border-[2px] border-black"
-              >
-                {isUploading ? "UPLOADING..." : "UPLOAD MARKSHEET"}
-              </button>
-            )}
+              {uploadedFile && (
+                <button
+                  onClick={handleParse}
+                  disabled={isParsing}
+                  className="mt-4 w-full bg-blue-600 text-white px-4 py-3 sm:px-6 font-bold text-sm sm:text-base"
+                >
+                  {isParsing ? "PARSING..." : "PARSE MARKSHEET"}
+                </button>
+              )}
+            </div>
 
-            {uploadedFile && (
-              <button
-                onClick={handleParse}
-                disabled={isParsing}
-                className="mt-4 w-full bg-blue-600 text-white px-6 py-3 font-bold"
-              >
-                {isParsing ? "PARSING..." : "PARSE MARKSHEET"}
-              </button>
-            )}
-          </div>
-
-          <div className="col-span-2">
-            {userRole === "student" ? (
-              <StudentTable />
-            ) : (
-              <TeacherTable />
-            )}
+            <div className="lg:col-span-2">
+              {userRole === "student" ? (
+                <StudentTable />
+              ) : (
+                <TeacherTable />
+              )}
+            </div>
           </div>
         </section>
 
         {/* Charts */}
         <section className="mb-10">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-[32px] font-bold">CHARTS</h2>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <h2 className="text-[24px] sm:text-[32px] font-bold">CHARTS</h2>
             {userRole === "student" && (
               <NavLink
                 to="/student-charts"
-                className="bg-black text-[#b9f36a] px-6 py-3 font-bold border-[2px] border-black hover:bg-[#b9f36a] hover:text-black transition-colors"
+                className="bg-black text-[#b9f36a] px-4 sm:px-6 py-2 sm:py-3 font-bold border-[2px] border-black hover:bg-[#b9f36a] hover:text-black transition-colors text-sm sm:text-base"
               >
                 VIEW ALL CHARTS ↗
               </NavLink>
             )}
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {userRole === "student" ? (
               selectedCharts.map((chartType, index) => {
                 switch(chartType) {
@@ -241,9 +239,8 @@ export default function Dashboard({ userRole = "student" }) {
 
       </main>
 
-      <footer className="px-[60px] py-[30px] border-t-[3px] border-black text-[11px] font-semibold">
-        2026 MARKSHEET PARSER
-      </footer>
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

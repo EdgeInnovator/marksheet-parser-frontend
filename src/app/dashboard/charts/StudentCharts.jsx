@@ -11,7 +11,7 @@ import {
 import { api } from "../../config/axiosSetup";
 import { getCokie } from "../../utils/utils";
 
-const StudentCharts = ({ fetchUploads }) => {
+const StudentCharts = ({ userId, role = "student" }) => {
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [theoryMarks, setTheoryMarks] = useState([]);
@@ -25,7 +25,6 @@ const StudentCharts = ({ fetchUploads }) => {
   const [pieData, setPieData] = useState([]);
   const [radarData, setRadarData] = useState([]);
   const [radarView, setRadarView] = useState('overall');
-  const [activeUser, setActiveUser] = useState(null);
 
   // Check viewport size
   useEffect(() => {
@@ -40,18 +39,13 @@ const StudentCharts = ({ fetchUploads }) => {
   }, []);
 
   useEffect(() => {
-    const userData = JSON.parse(getCokie("ACTIVE_USER"));
-    setActiveUser(userData.id);
-  }, []);
-
-  useEffect(() => {
-    if (activeUser) {
+    if (userId) {
       const fetchData = async () => {
         try {
           setLoading(true);
-          const data = await fetchUploads();
-          console.log("Charts data received:", data);
-          setResponse(data);
+          const response = await api.get(`/marksheet/exams?user_id=${userId}`);
+          console.log("Charts data received:", response.data);
+          setResponse(response.data);
         } catch (error) {
           console.error("Error fetching charts data:", error);
         } finally {
@@ -61,7 +55,7 @@ const StudentCharts = ({ fetchUploads }) => {
 
       fetchData();
     }
-  }, [activeUser, fetchUploads]);
+  }, [userId]);
 
   // Filter theory subjects
   const filterTheoryMarks = useCallback(() => {
