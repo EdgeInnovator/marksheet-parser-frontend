@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   BarChart, Bar,
-  RadarChart, Radar,
-  PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   Tooltip, ResponsiveContainer,
   CartesianGrid, XAxis, YAxis,
   Legend,
-  PieChart, Pie, Cell
+  PieChart, Pie, Cell,
+  RadarChart, Radar,
+  PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from "recharts";
+import { api } from "../../config/axiosSetup";
+import { getCokie } from "../../utils/utils";
 
 const StudentCharts = ({ fetchUploads }) => {
   const [response, setResponse] = useState(null);
@@ -23,21 +25,27 @@ const StudentCharts = ({ fetchUploads }) => {
   const [pieData, setPieData] = useState([]);
   const [radarData, setRadarData] = useState([]);
   const [radarView, setRadarView] = useState('overall');
+  const [activeUser, setActiveUser] = useState(null);
 
   // Check viewport size
   useEffect(() => {
     const checkViewport = () => {
       setIsSmallViewport(window.innerWidth < 768);
     };
-
+    
     checkViewport();
     window.addEventListener("resize", checkViewport);
-
+    
     return () => window.removeEventListener("resize", checkViewport);
   }, []);
 
   useEffect(() => {
-    if (fetchUploads) {
+    const userData = JSON.parse(getCokie("ACTIVE_USER"));
+    setActiveUser(userData.id);
+  }, []);
+
+  useEffect(() => {
+    if (activeUser) {
       const fetchData = async () => {
         try {
           setLoading(true);
@@ -53,67 +61,57 @@ const StudentCharts = ({ fetchUploads }) => {
 
       fetchData();
     }
-  }, [fetchUploads]);
+  }, [activeUser, fetchUploads]);
 
   // Filter theory subjects
   const filterTheoryMarks = useCallback(() => {
     if (!response?.data?.length) return [];
-
-    console.log("Processing theory marks...");
-
-    return response.data[0].subjects.filter(
-      (item) => item.subject_type === "theory",
-    );
+    return response.data[0].subjects.filter(item => item.subject_type === "theory");
   }, [response]);
 
   // Filter practical subjects
   const filterPracticalMarks = useCallback(() => {
     if (!response?.data?.length) return [];
-
-    console.log("Processing practical marks...");
-
-    return response.data[0].subjects.filter(
-      (item) => item.subject_type === "practical",
-    );
+    return response.data[0].subjects.filter(item => item.subject_type === "practical");
   }, [response]);
 
   // Create FA theory marks structure
   const createFaTheoryMarks = useCallback(() => {
     const theory = filterTheoryMarks();
-    return theory.map((subject) => ({
+    return theory.map(subject => ({
       subject_name: subject.subject_name,
       fa_th_max: subject.fa_th_max || 0,
-      fa_th_obt: subject.fa_th_obt || 0,
+      fa_th_obt: subject.fa_th_obt || 0
     }));
   }, [filterTheoryMarks]);
 
   // Create FA practical marks structure
   const createFaPracticalMarks = useCallback(() => {
     const allSubjects = [...filterTheoryMarks(), ...filterPracticalMarks()];
-    return allSubjects.map((subject) => ({
+    return allSubjects.map(subject => ({
       subject_name: subject.subject_name,
       fa_pr_max: subject.fa_pr_max || 0,
-      fa_pr_obt: subject.fa_pr_obt || 0,
+      fa_pr_obt: subject.fa_pr_obt || 0
     }));
   }, [filterTheoryMarks, filterPracticalMarks]);
 
   // Create SA theory marks structure
   const createSaTheoryMarks = useCallback(() => {
     const theory = filterTheoryMarks();
-    return theory.map((subject) => ({
+    return theory.map(subject => ({
       subject_name: subject.subject_name,
       sa_th_max: subject.sa_th_max || 0,
-      sa_th_obt: subject.sa_th_obt || 0,
+      sa_th_obt: subject.sa_th_obt || 0
     }));
   }, [filterTheoryMarks]);
 
   // Create SA practical marks structure
   const createSaPracticalMarks = useCallback(() => {
     const allSubjects = [...filterTheoryMarks(), ...filterPracticalMarks()];
-    return allSubjects.map((subject) => ({
+    return allSubjects.map(subject => ({
       subject_name: subject.subject_name,
       sa_pr_max: subject.sa_pr_max || 0,
-      sa_pr_obt: subject.sa_pr_obt || 0,
+      sa_pr_obt: subject.sa_pr_obt || 0
     }));
   }, [filterTheoryMarks, filterPracticalMarks]);
 
@@ -147,47 +145,28 @@ const StudentCharts = ({ fetchUploads }) => {
     setSaPracticalMarks(saPractical);
   }, [createSaPracticalMarks]);
 
-  // Calculate Y-axis domain for FA Theory
+  // Calculate Y-axis domain functions
   const getFaTheoryYDomain = useCallback(() => {
     if (faTheoryMarks.length === 0) return [0, 100];
-    const maxMark = Math.max(
-      ...faTheoryMarks.map((item) =>
-        Math.max(item.fa_th_max || 0, item.fa_th_obt || 0),
-      ),
-    );
+    const maxMark = Math.max(...faTheoryMarks.map(item => Math.max(item.fa_th_max || 0, item.fa_th_obt || 0)));
     return [0, maxMark];
   }, [faTheoryMarks]);
 
-  // Calculate Y-axis domain for FA Practical
   const getFaPracticalYDomain = useCallback(() => {
     if (faPracticalMarks.length === 0) return [0, 100];
-    const maxMark = Math.max(
-      ...faPracticalMarks.map((item) =>
-        Math.max(item.fa_pr_max || 0, item.fa_pr_obt || 0),
-      ),
-    );
+    const maxMark = Math.max(...faPracticalMarks.map(item => Math.max(item.fa_pr_max || 0, item.fa_pr_obt || 0)));
     return [0, maxMark];
   }, [faPracticalMarks]);
 
-  // Calculate Y-axis domain for SA Theory
   const getSaTheoryYDomain = useCallback(() => {
     if (saTheoryMarks.length === 0) return [0, 100];
-    const maxMark = Math.max(
-      ...saTheoryMarks.map((item) =>
-        Math.max(item.sa_th_max || 0, item.sa_th_obt || 0),
-      ),
-    );
+    const maxMark = Math.max(...saTheoryMarks.map(item => Math.max(item.sa_th_max || 0, item.sa_th_obt || 0)));
     return [0, maxMark];
   }, [saTheoryMarks]);
 
-  // Calculate Y-axis domain for SA Practical
   const getSaPracticalYDomain = useCallback(() => {
     if (saPracticalMarks.length === 0) return [0, 100];
-    const maxMark = Math.max(
-      ...saPracticalMarks.map((item) =>
-        Math.max(item.sa_pr_max || 0, item.sa_pr_obt || 0),
-      ),
-    );
+    const maxMark = Math.max(...saPracticalMarks.map(item => Math.max(item.sa_pr_max || 0, item.sa_pr_obt || 0)));
     return [0, maxMark];
   }, [saPracticalMarks]);
 
@@ -367,13 +346,6 @@ const StudentCharts = ({ fetchUploads }) => {
 
   const chartConfig = getChartConfig();
 
-  console.log("Theory Marks:", theoryMarks);
-  console.log("Practical Marks:", practicalMarks);
-  console.log("FA Theory Marks:", faTheoryMarks);
-  console.log("FA Practical Marks:", faPracticalMarks);
-  console.log("SA Theory Marks:", saTheoryMarks);
-  console.log("SA Practical Marks:", saPracticalMarks);
-
   return (
     <>
       {loading && <p>Loading...</p>}
@@ -525,75 +497,86 @@ const StudentCharts = ({ fetchUploads }) => {
       </div>
 
       {/* FA Theory Marks Chart */}
-      {/* FA Theory Marks Chart */}
       <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         <h3 className="text-lg font-bold mb-4">FA Theory Marks</h3>
-
         <ResponsiveContainer width="100%" height={chartConfig.height}>
-          <BarChart data={faTheoryMarks} margin={chartConfig.margin}>
+          <BarChart 
+            data={faTheoryMarks} 
+            margin={chartConfig.margin}
+          >
             <CartesianGrid strokeDasharray="3 3" />
-
-            <XAxis
-              dataKey="subject_name"
+            <XAxis 
+              dataKey="subject_name" 
               angle={chartConfig.xAxisAngle}
               textAnchor={chartConfig.xAxisAngle ? "end" : "middle"}
               height={chartConfig.xAxisHeight}
               interval={0}
-              tick={{ fontSize: chartConfig.xAxisFontSize, fill: "#333" }}
+              tick={{ fontSize: chartConfig.xAxisFontSize, fill: '#333' }}
             />
-
-            <YAxis
+            <YAxis 
               domain={getFaTheoryYDomain()}
-              tick={{ fontSize: chartConfig.yAxisFontSize, fill: "#333" }}
+              tick={{ fontSize: chartConfig.yAxisFontSize, fill: '#333' }}
               width={chartConfig.yAxisWidth}
             />
-
             <Tooltip />
-
-            <Legend
+            <Legend 
               wrapperStyle={{ fontSize: chartConfig.legendFontSize }}
               iconSize={chartConfig.legendIconSize}
             />
-
-            <Bar
-              dataKey="fa_th_obt"
-              fill="#82ca9d"
+            <Bar 
+              dataKey="fa_th_max" 
+              fill="#8884d8" 
+              name="Max Marks"
+              label={{ position: 'top', fontSize: chartConfig.labelFontSize, fill: '#666' }}
+            />
+            <Bar 
+              dataKey="fa_th_obt" 
+              fill="#82ca9d" 
               name="Obtained Marks"
-              label={{
-                position: "top",
-                fontSize: chartConfig.labelFontSize,
-                fill: "#666",
-              }}
+              label={{ position: 'top', fontSize: chartConfig.labelFontSize, fill: '#666' }}
             />
           </BarChart>
         </ResponsiveContainer>
       </div>
+
       {/* FA Practical Marks Chart */}
       <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         <h3 className="text-lg font-bold mb-4">FA Practical Marks</h3>
         <ResponsiveContainer width="100%" height={chartConfig.height}>
-          <BarChart data={faPracticalMarks} margin={chartConfig.margin}>
+          <BarChart 
+            data={faPracticalMarks} 
+            margin={chartConfig.margin}
+          >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="subject_name"
+            <XAxis 
+              dataKey="subject_name" 
               angle={chartConfig.xAxisAngle}
               textAnchor={chartConfig.xAxisAngle ? "end" : "middle"}
               height={chartConfig.xAxisHeight}
               interval={0}
-              tick={{ fontSize: 8, fill: "#333" }}
+              tick={{ fontSize: 8, fill: '#333' }}
             />
-            <YAxis
+            <YAxis 
               domain={getFaPracticalYDomain()}
-              tick={{ fontSize: 8, fill: "#333" }}
+              tick={{ fontSize: 8, fill: '#333' }}
               width={chartConfig.yAxisWidth}
             />
             <Tooltip />
-            <Legend wrapperStyle={{ fontSize: "10px" }} iconSize={8} />
-            <Bar
-              dataKey="fa_pr_obt"
-              fill="#82ca9d"
+            <Legend 
+              wrapperStyle={{ fontSize: '10px' }}
+              iconSize={8}
+            />
+            <Bar 
+              dataKey="fa_pr_max" 
+              fill="#8884d8" 
+              name="Max Marks"
+              label={{ position: 'top', fontSize: 8, fill: '#666' }}
+            />
+            <Bar 
+              dataKey="fa_pr_obt" 
+              fill="#82ca9d" 
               name="Obtained Marks"
-              label={{ position: "top", fontSize: 8, fill: "#666" }}
+              label={{ position: 'top', fontSize: 8, fill: '#666' }}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -603,35 +586,40 @@ const StudentCharts = ({ fetchUploads }) => {
       <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         <h3 className="text-lg font-bold mb-4">SA Theory Marks</h3>
         <ResponsiveContainer width="100%" height={chartConfig.height}>
-          <BarChart data={saTheoryMarks} margin={chartConfig.margin}>
+          <BarChart 
+            data={saTheoryMarks} 
+            margin={chartConfig.margin}
+          >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="subject_name"
+            <XAxis 
+              dataKey="subject_name" 
               angle={chartConfig.xAxisAngle}
               textAnchor={chartConfig.xAxisAngle ? "end" : "middle"}
               height={chartConfig.xAxisHeight}
               interval={0}
-              tick={{ fontSize: chartConfig.xAxisFontSize, fill: "#333" }}
+              tick={{ fontSize: chartConfig.xAxisFontSize, fill: '#333' }}
             />
-            <YAxis
+            <YAxis 
               domain={getSaTheoryYDomain()}
-              tick={{ fontSize: chartConfig.yAxisFontSize, fill: "#333" }}
+              tick={{ fontSize: chartConfig.yAxisFontSize, fill: '#333' }}
               width={chartConfig.yAxisWidth}
             />
             <Tooltip />
-            <Legend
+            <Legend 
               wrapperStyle={{ fontSize: chartConfig.legendFontSize }}
               iconSize={chartConfig.legendIconSize}
             />
-            <Bar
-              dataKey="sa_th_obt"
-              fill="#82ca9d"
+            <Bar 
+              dataKey="sa_th_max" 
+              fill="#8884d8" 
+              name="Max Marks"
+              label={{ position: 'top', fontSize: chartConfig.labelFontSize, fill: '#666' }}
+            />
+            <Bar 
+              dataKey="sa_th_obt" 
+              fill="#82ca9d" 
               name="Obtained Marks"
-              label={{
-                position: "top",
-                fontSize: chartConfig.labelFontSize,
-                fill: "#666",
-              }}
+              label={{ position: 'top', fontSize: chartConfig.labelFontSize, fill: '#666' }}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -641,28 +629,40 @@ const StudentCharts = ({ fetchUploads }) => {
       <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         <h3 className="text-lg font-bold mb-4">SA Practical Marks</h3>
         <ResponsiveContainer width="100%" height={chartConfig.height}>
-          <BarChart data={saPracticalMarks} margin={chartConfig.margin}>
+          <BarChart 
+            data={saPracticalMarks} 
+            margin={chartConfig.margin}
+          >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="subject_name"
+            <XAxis 
+              dataKey="subject_name" 
               angle={chartConfig.xAxisAngle}
               textAnchor={chartConfig.xAxisAngle ? "end" : "middle"}
               height={chartConfig.xAxisHeight}
               interval={0}
-              tick={{ fontSize: 8, fill: "#333" }}
+              tick={{ fontSize: 8, fill: '#333' }}
             />
-            <YAxis
+            <YAxis 
               domain={getSaPracticalYDomain()}
-              tick={{ fontSize: 8, fill: "#333" }}
+              tick={{ fontSize: 8, fill: '#333' }}
               width={chartConfig.yAxisWidth}
             />
             <Tooltip />
-            <Legend wrapperStyle={{ fontSize: "10px" }} iconSize={8} />
-            <Bar
-              dataKey="sa_pr_obt"
-              fill="#82ca9d"
+            <Legend 
+              wrapperStyle={{ fontSize: '10px' }}
+              iconSize={8}
+            />
+            <Bar 
+              dataKey="sa_pr_max" 
+              fill="#8884d8" 
+              name="Max Marks"
+              label={{ position: 'top', fontSize: 8, fill: '#666' }}
+            />
+            <Bar 
+              dataKey="sa_pr_obt" 
+              fill="#82ca9d" 
               name="Obtained Marks"
-              label={{ position: "top", fontSize: 8, fill: "#666" }}
+              label={{ position: 'top', fontSize: 8, fill: '#666' }}
             />
           </BarChart>
         </ResponsiveContainer>
