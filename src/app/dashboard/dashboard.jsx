@@ -8,10 +8,16 @@ import { getCokie } from "../utils/utils";
 // Role-specific components
 import StudentStats from "./StudentStats";
 import TeacherStats from "./TeacherStats";
-import StudentCharts from "./StudentCharts";
-import TeacherCharts from "./TeacherCharts";
 import StudentTable from "./StudentTable";
 import TeacherTable from "./TeacherTable";
+
+// Individual chart components from charts folder
+import FATheoryChart from "./charts/FATheoryChart";
+import FAPracticalChart from "./charts/FAPracticalChart";
+import SATheoryChart from "./charts/SATheoryChart";
+import SAPracticalChart from "./charts/SAPracticalChart";
+import SubjectPieChart from "./charts/PieChart";
+import PerformanceRadarChart from "./charts/RadarChart";
 
 export default function Dashboard({ userRole = "student" }) {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -19,12 +25,20 @@ export default function Dashboard({ userRole = "student" }) {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [isParsing, setIsParsing] = useState(false);
   const [activeUser, setActiveUser] = useState(null);
+  const [selectedCharts, setSelectedCharts] = useState([]);
 
   useEffect(() => {
     const userId = JSON.parse(getCokie("ACTIVE_USER"));
     // console.log(userId);
     setActiveUser(userId.id);
-  }, []);
+    
+    // Randomly select 2 charts for students
+    if (userRole === "student") {
+      const allCharts = ['faTheory', 'faPractical', 'saTheory', 'saPractical', 'pieChart', 'radarChart'];
+      const shuffled = [...allCharts].sort(() => 0.5 - Math.random());
+      setSelectedCharts(shuffled.slice(0, 2));
+    }
+  }, [userRole]);
 
   const fetchChartsData = useCallback(async () => {
     console.log(activeUser)
@@ -115,6 +129,9 @@ export default function Dashboard({ userRole = "student" }) {
 
         <nav className="space-x-8 text-[12px] font-semibold">
           <NavLink to="/dashboard">DASHBOARD</NavLink>
+          {userRole === "student" && (
+            <NavLink to="/student-charts">CHARTS</NavLink>
+          )}
           <NavLink to="/about-us">ABOUT US</NavLink>
           <NavLink to="/logout">LOGOUT</NavLink>
         </nav>
@@ -183,12 +200,43 @@ export default function Dashboard({ userRole = "student" }) {
         </section>
 
         {/* Charts */}
-        <section className="grid md:grid-cols-2 gap-8 mb-10">
-          {userRole === "student" ? (
-            <StudentCharts fetchUploads={fetchChartsData} />
-          ) : (
-            <TeacherCharts />
-          )}
+        <section className="mb-10">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-[32px] font-bold">CHARTS</h2>
+            {userRole === "student" && (
+              <NavLink
+                to="/student-charts"
+                className="bg-black text-[#b9f36a] px-6 py-3 font-bold border-[2px] border-black hover:bg-[#b9f36a] hover:text-black transition-colors"
+              >
+                VIEW ALL CHARTS ↗
+              </NavLink>
+            )}
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            {userRole === "student" ? (
+              selectedCharts.map((chartType, index) => {
+                switch(chartType) {
+                  case 'faTheory':
+                    return <FATheoryChart key={index} userId={activeUser} role={userRole} />;
+                  case 'faPractical':
+                    return <FAPracticalChart key={index} userId={activeUser} role={userRole} />;
+                  case 'saTheory':
+                    return <SATheoryChart key={index} userId={activeUser} role={userRole} />;
+                  case 'saPractical':
+                    return <SAPracticalChart key={index} userId={activeUser} role={userRole} />;
+                  case 'pieChart':
+                    return <SubjectPieChart key={index} userId={activeUser} role={userRole} />;
+                  case 'radarChart':
+                    return <PerformanceRadarChart key={index} userId={activeUser} role={userRole} />;
+                  default:
+                    return null;
+                }
+              })
+            ) : (
+              <TeacherCharts />
+            )}
+          </div>
         </section>
 
       </main>
