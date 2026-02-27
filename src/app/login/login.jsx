@@ -9,6 +9,7 @@ import { useNavigate, NavLink } from "react-router-dom";
 import { setCokie, getCokie } from "../utils/utils";
 import AuthNavbar from "../../components/AuthNavbar";
 import AuthFooter from "../../components/AuthFooter";
+import PasswordInput from "../../components/PasswordInput";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -135,13 +136,10 @@ export default function Login() {
             <label className="block text-[11px] font-bold tracking-wide mb-2">
               PASSWORD
             </label>
-            <input
-              {...register("password")}
-              type="password"
+            <PasswordInput
+              register={register}
+              error={errors.password}
               placeholder="•••••••"
-              className={`w-full p-[14px] border-[3px] ${
-                errors.password ? 'border-red-500' : 'border-black'
-              } text-[14px] mb-2 placeholder:text-[#999]`}
             />
             {errors.password && (
               <p className="text-red-500 text-[11px] mb-6">
