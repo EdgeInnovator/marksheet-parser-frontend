@@ -54,6 +54,117 @@ export default function ViewMarksheetModal({ isOpen, onClose, filename }) {
     }
   };
 
+  const handleExportToCSV = () => {
+    if (!marksheetData || !marksheetData.parsed_data) {
+      toast.error('No data available to export');
+      return;
+    }
+
+    const data = marksheetData.parsed_data;
+    
+    // Create CSV content
+    let csvContent = '';
+    
+    // Add file information
+    csvContent += 'MARKSHEET DATA EXPORT\n\n';
+    csvContent += 'FILE INFORMATION\n';
+    csvContent += `Filename,${marksheetData.filename || 'N/A'}\n`;
+    csvContent += `File Size,${marksheetData.size ? `${(marksheetData.size / 1024 / 1024).toFixed(2)} MB` : 'N/A'}\n`;
+    csvContent += `Upload Date,${marksheetData.upload_date ? new Date(marksheetData.upload_date).toLocaleDateString() : 'N/A'}\n`;
+    csvContent += `Parse Status,${marksheetData.parse_status || 'UPLOADED'}\n\n`;
+    
+    // Add student information
+    csvContent += 'STUDENT INFORMATION\n';
+    csvContent += `Student Name,${data.student_name || 'N/A'}\n`;
+    csvContent += `Enrollment No,${data.enrollment_no || 'N/A'}\n`;
+    csvContent += `Examination,${data.examination || 'N/A'}\n`;
+    csvContent += `Semester,${data.semester || 'N/A'}\n`;
+    csvContent += `Course,${data.course || 'N/A'}\n`;
+    csvContent += `Subjects Count,${data.subjects_count || 'N/A'}\n\n`;
+    
+    // Add overall performance
+    csvContent += 'OVERALL PERFORMANCE\n';
+    csvContent += `Total Marks Obtained,${data.total_marks_obtained || 'N/A'}\n`;
+    csvContent += `Percentage,${data.percentage || 'N/A'}%\n`;
+    csvContent += `Result,${data.result || 'N/A'}\n`;
+    csvContent += `GPA,${data.gpa || 'N/A'}\n\n`;
+    
+    // Add subject grades if available
+    if (data.subjects && data.subjects.length > 0) {
+      csvContent += 'SUBJECT GRADES\n';
+      csvContent += 'Subject,Marks,Grade,Status\n';
+      data.subjects.forEach(subject => {
+        csvContent += `"${subject.name || 'N/A'}",${subject.marks || 'N/A'},"${subject.grade || 'N/A'}","${subject.status || 'N/A'}"\n`;
+      });
+    }
+    
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const csvFilename = `${data.student_name || 'marksheet'}_${data.examination || 'exam'}_${new Date().toISOString().split('T')[0]}.csv`;
+    
+    link.href = url;
+    link.setAttribute('download', csvFilename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+    
+    toast.success('CSV exported successfully');
+  };
+
+  const handleExportToJson = () => {
+    if (!marksheetData || !marksheetData.parsed_data) {
+      toast.error('No data available to export');
+      return;
+    }
+
+    const data = marksheetData.parsed_data;
+    const filename = marksheetData.filename || 'marksheet';
+    const studentName = data.student_name || 'marksheet';
+    const examination = data.examination || 'exam';
+    
+    const exportData = {
+      file_information: {
+        filename: marksheetData.filename,
+        file_size: marksheetData.size,
+        upload_date: marksheetData.upload_date,
+        parse_status: marksheetData.parse_status
+      },
+      student_information: {
+        student_name: data.student_name,
+        enrollment_no: data.enrollment_no,
+        examination: data.examination,
+        semester: data.semester,
+        course: data.course,
+        subjects_count: data.subjects_count
+      },
+      overall_performance: {
+        total_marks_obtained: data.total_marks_obtained,
+        percentage: data.percentage,
+        result: data.result,
+        gpa: data.gpa
+      },
+      subject_grades: data.subjects
+    };
+
+    const jsonContent = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const jsonFilename = `${studentName}_${examination}_${new Date().toISOString().split('T')[0]}.json`;
+    
+    link.href = url;
+    link.setAttribute('download', jsonFilename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+    
+    toast.success('JSON exported successfully');
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -231,6 +342,20 @@ export default function ViewMarksheetModal({ isOpen, onClose, filename }) {
 
             {/* Action Buttons */}
             <div className="flex justify-end gap-3 pt-4 border-t-2 border-black">
+              <button 
+                onClick={handleExportToJson}
+                className="btn bg-purple-600 text-white border-2 border-black hover:bg-purple-700 font-bold"
+              >
+                <Download size={16} />
+                Export to JSON
+              </button>
+              <button 
+                onClick={handleExportToCSV}
+                className="btn bg-blue-600 text-white border-2 border-black hover:bg-blue-700 font-bold"
+              >
+                <Download size={16} />
+                Export to CSV
+              </button>
               <button 
                 onClick={handleDownload}
                 className="btn bg-[#b9f36a] text-black border-2 border-black hover:bg-black hover:text-[#b9f36a] font-bold"
