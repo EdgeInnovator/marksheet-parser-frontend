@@ -226,6 +226,30 @@ export default function TeacherDashboard() {
                 ANALYZE SMARTER.
               </p>
             </div>
+            
+            {/* Quick Summary from teacherSummary */}
+            {teacherSummary && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 w-full md:w-auto">
+                <StatCardComponent 
+                  title="Success Rate" 
+                  value={`${teacherSummary.overview.pass_rate}%`}
+                  subtitle={`Threshold: 60%`}
+                  color="purple"
+                />
+                <StatCardComponent 
+                  title="High Performers" 
+                  value={teacherSummary.performance_distribution.high_performers}
+                  subtitle={`Score > 80%`}
+                  color="blue"
+                />
+                <StatCardComponent 
+                  title="Avg Score" 
+                  value={`${teacherSummary.overview.average_percentage}%`}
+                  subtitle="Class average"
+                  color="green"
+                />
+              </div>
+            )}
           </div>
         </section>
 
