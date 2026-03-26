@@ -23,7 +23,6 @@ export default function TeacherDashboard() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isParsing, setIsParsing] = useState(false);
   const [activeUser, setActiveUser] = useState(null);
-  const [teacherSummary, setTeacherSummary] = useState(null);
 
   useEffect(() => {
     try {
@@ -57,8 +56,6 @@ export default function TeacherDashboard() {
             console.error('No valid ID field found in user data');
           }
         }
-        // Fetch teacher summary data
-        fetchTeacherSummary(userData.id);
       } else {
         console.log('No ACTIVE_USER cookie found');
       }
@@ -66,30 +63,6 @@ export default function TeacherDashboard() {
       console.error('Error parsing ACTIVE_USER cookie:', error);
     }
   }, []);
-
-  const fetchTeacherSummary = async (teacherId) => {
-    try {
-      console.log('Fetching teacher summary for:', teacherId);
-      let endpoint = `/marksheet/teacher/summary/${teacherId}`;
-      let response;
-      try {
-        response = await api.get(endpoint);
-      } catch (err) {
-        if (err.response?.status === 404) {
-          console.log('Teacher summary not found at primary endpoint, trying fallback /marksheet/staff/summary');
-          endpoint = `/marksheet/staff/summary/${teacherId}`;
-          response = await api.get(endpoint);
-        } else {
-          throw err;
-        }
-      }
-      console.log('Teacher summary response:', response.data);
-      setTeacherSummary(response.data);
-    } catch (error) {
-      console.error('Error fetching teacher summary:', error);
-      // Don't show error toast - summary is optional enhancement
-    }
-  };
 
   const fetchChartsData = useCallback(async () => {
     if (!activeUser) return;
@@ -226,30 +199,6 @@ export default function TeacherDashboard() {
                 ANALYZE SMARTER.
               </p>
             </div>
-            
-            {/* Quick Summary from teacherSummary */}
-            {teacherSummary && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 w-full md:w-auto">
-                <StatCardComponent 
-                  title="Success Rate" 
-                  value={`${teacherSummary.overview.pass_rate}%`}
-                  subtitle={`Threshold: 60%`}
-                  color="purple"
-                />
-                <StatCardComponent 
-                  title="High Performers" 
-                  value={teacherSummary.performance_distribution.high_performers}
-                  subtitle={`Score > 80%`}
-                  color="blue"
-                />
-                <StatCardComponent 
-                  title="Avg Score" 
-                  value={`${teacherSummary.overview.average_percentage}%`}
-                  subtitle="Class average"
-                  color="green"
-                />
-              </div>
-            )}
           </div>
         </section>
 
