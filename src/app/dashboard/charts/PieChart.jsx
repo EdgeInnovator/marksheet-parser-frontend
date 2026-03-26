@@ -40,7 +40,18 @@ const SubjectPieChart = ({ userId, role = "student", title = "Subject Performanc
   // Get all subjects for dropdown
   const getAllSubjects = useCallback(() => {
     if (!response?.data?.length) return [];
-    return response.data[0].subjects.map(subject => subject.subject_name);
+    return response.data[0].subjects
+      .filter(subject => {
+        // Filter out subjects where all marks are 0 or null
+        const hasAnyMarks = 
+          (subject.fa_th_max && subject.fa_th_obt) ||
+          (subject.fa_pr_max && subject.fa_pr_obt) ||
+          (subject.sa_th_max && subject.sa_th_obt) ||
+          (subject.sa_pr_max && subject.sa_pr_obt) ||
+          (subject.total_max && subject.total_obt);
+        return hasAnyMarks;
+      })
+      .map(subject => subject.subject_name);
   }, [response]);
 
   // Calculate pie chart data for selected subject

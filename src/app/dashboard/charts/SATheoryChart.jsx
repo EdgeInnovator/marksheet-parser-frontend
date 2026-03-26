@@ -56,11 +56,18 @@ const SATheoryChart = () => {
 
   const createSaTheoryMarks = useCallback(() => {
     const theory = filterTheoryMarks();
-    return theory.map(subject => ({
-      subject_name: subject.subject_name,
-      sa_th_max: subject.sa_th_max || 0,
-      sa_th_obt: subject.sa_th_obt || 0
-    }));
+    return theory
+      .filter(subject => {
+        // Filter out subjects where both obtained and max marks are 0 or null
+        const obtained = subject.sa_th_obt || 0;
+        const max = subject.sa_th_max || 0;
+        return obtained > 0 || max > 0;
+      })
+      .map(subject => ({
+        subject_name: subject.subject_name,
+        sa_th_max: subject.sa_th_max || 0,
+        sa_th_obt: subject.sa_th_obt || 0
+      }));
   }, [filterTheoryMarks]);
 
   useEffect(() => {

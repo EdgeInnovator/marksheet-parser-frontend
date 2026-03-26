@@ -61,11 +61,18 @@ const SAPracticalChart = () => {
 
   const createSaPracticalMarks = useCallback(() => {
     const allSubjects = [...filterTheoryMarks(), ...filterPracticalMarks()];
-    return allSubjects.map(subject => ({
-      subject_name: subject.subject_name,
-      sa_pr_max: subject.sa_pr_max || 0,
-      sa_pr_obt: subject.sa_pr_obt || 0
-    }));
+    return allSubjects
+      .filter(subject => {
+        // Filter out subjects where both obtained and max marks are 0 or null
+        const obtained = subject.sa_pr_obt || 0;
+        const max = subject.sa_pr_max || 0;
+        return obtained > 0 || max > 0;
+      })
+      .map(subject => ({
+        subject_name: subject.subject_name,
+        sa_pr_max: subject.sa_pr_max || 0,
+        sa_pr_obt: subject.sa_pr_obt || 0
+      }));
   }, [filterTheoryMarks, filterPracticalMarks]);
 
   useEffect(() => {

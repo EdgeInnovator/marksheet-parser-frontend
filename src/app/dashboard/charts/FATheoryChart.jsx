@@ -27,11 +27,18 @@ const FATheoryChart = ({ userId, role = "student", title = "FA Theory Marks" }) 
   // Create FA theory marks structure
   const createFaTheoryMarks = useCallback(() => {
     const theory = filterSubjectsByType("theory");
-    return theory.map(subject => ({
-      subject_name: subject.subject_name,
-      fa_th_max: subject.fa_th_max || 0,
-      fa_th_obt: subject.fa_th_obt || 0
-    }));
+    return theory
+      .filter(subject => {
+        // Filter out subjects where both obtained and max marks are 0 or null
+        const obtained = subject.fa_th_obt || 0;
+        const max = subject.fa_th_max || 0;
+        return obtained > 0 || max > 0;
+      })
+      .map(subject => ({
+        subject_name: subject.subject_name,
+        fa_th_max: subject.fa_th_max || 0,
+        fa_th_obt: subject.fa_th_obt || 0
+      }));
   }, [filterSubjectsByType]);
 
   useEffect(() => {

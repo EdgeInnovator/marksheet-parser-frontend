@@ -54,6 +54,17 @@ const PerformanceRadarChart = ({ userId, role = "student", title = "Overall Perf
       filteredSubjects = subjects.filter(subject => subject.subject_type === 'practical');
     }
     
+    // Additional filter to exclude subjects with all zero/null values
+    filteredSubjects = filteredSubjects.filter(subject => {
+      const hasAnyMarks = 
+        (subject.fa_th_max && subject.fa_th_obt && subject.fa_th_obt > 0) ||
+        (subject.fa_pr_max && subject.fa_pr_obt && subject.fa_pr_obt > 0) ||
+        (subject.sa_th_max && subject.sa_th_obt && subject.sa_th_obt > 0) ||
+        (subject.sa_pr_max && subject.sa_pr_obt && subject.sa_pr_obt > 0) ||
+        (subject.total_max && subject.total_obt && subject.total_obt > 0);
+      return hasAnyMarks;
+    });
+    
     // Create radar data for each subject
     filteredSubjects.forEach(subject => {
       const subjectData = {
