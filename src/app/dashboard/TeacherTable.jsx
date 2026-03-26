@@ -19,17 +19,23 @@ export default function TeacherTable() {
       // Get current user from cookies
       const activeUser = getCokie('ACTIVE_USER');
       const userData = activeUser ? JSON.parse(activeUser) : null;
+      const teacherId = userData?.id;
       
+      if (!teacherId) {
+        toast.error('User not authenticated');
+        setLoading(false);
+        return;
+      }
+      
+      // Use the uploaded-files endpoint for teachers
       const response = await api({
         url: '/marksheet/uploaded-files',
         method: 'POST',
-        data: {
-          user_id: userData?.id || null
-        }
+        data: { user_id: teacherId }
       });
       
-      // Handle both database records and file system responses
-      const filesData = response.data.data || [];
+      // Set files directly from response (match StudentTable pattern)
+      const filesData = response.data?.data || [];
       setFiles(filesData);
     } catch (error) {
       console.error('Error fetching uploads:', error);

@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import './App.css'
 import Login from './app/login/login'
 import Signup from './app/signup/signup'
@@ -9,7 +10,10 @@ import StudentChartsPage from './app/dashboard/StudentChartsPage'
 import StatCardsDemoPage from './app/dashboard/StatCardsDemo'
 import ProtectedRoute from './components/ProtectedRoute'
 import { getCokie } from './app/utils/utils'
+
 function App() {
+  const [userRole, setUserRole] = useState('student');
+
   // Get user data from ACTIVE_USER cookie
   const getUserRole = () => {
     const activeUser = getCokie('ACTIVE_USER');
@@ -25,7 +29,26 @@ function App() {
     return 'student'; // Default role
   };
 
-  const userRole = getUserRole();
+  // Update user role when component mounts or when cookies change
+  useEffect(() => {
+    const updateUserRole = () => {
+      const role = getUserRole();
+      setUserRole(role);
+    };
+
+    updateUserRole();
+    
+    // Listen for storage changes (in case of logout/login in other tabs)
+    const handleStorageChange = () => {
+      updateUserRole();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   return (
     <>

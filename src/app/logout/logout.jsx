@@ -12,7 +12,7 @@ export default function Logout() {
       try {
         // Call backend logout endpoint to invalidate session
         await api({
-          url: '/logout',
+          url: '/auth/logout',
           method: 'POST'
         });
       } catch (error) {

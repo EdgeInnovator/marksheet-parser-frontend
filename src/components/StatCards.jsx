@@ -35,7 +35,7 @@ export const StatCardRoute1 = ({ title, value, subtitle, color = "black" }) => {
 };
 
 // ROUTE 2: Centered Focus Layout
-export const StatCardRoute2 = ({ title, value, subtitle, color = "black" }) => {
+export const StatCardRoute2 = ({ title, value, subtitle, color = "black", icon = "chart" }) => {
   const getColorClasses = () => {
     const colors = {
       black: 'border-black',
@@ -47,12 +47,28 @@ export const StatCardRoute2 = ({ title, value, subtitle, color = "black" }) => {
     return colors[color] || colors.black;
   };
 
+  const getIconPath = () => {
+    const icons = {
+      // Students icon - user group
+      students: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z",
+      // Performance/Average icon - trending up
+      performance: "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6",
+      // Exams/Tasks icon - document/list
+      exams: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
+      // Success/Grade icon - checkmark/star
+      success: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0zm9 3a1 1 0 01-1 1H5a1 1 0 01-1-1v-2a1 1 0 011-1h14a1 1 0 011 1v2z",
+      // Default chart icon
+      chart: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+    };
+    return icons[icon] || icons.chart;
+  };
+
   return (
     <div className={`bg-white border-[4px] ${getColorClasses()} p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-all duration-200`}>
       <div className="text-center">
         <div className="inline-block w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mb-4">
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconPath()} />
           </svg>
         </div>
         <h3 className="text-xl font-black uppercase mb-2">{title}</h3>
@@ -141,49 +157,131 @@ export const StatCardsContainer = ({ userId, route = 1 }) => {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/marksheet/exams?user_id=${userId}`);
-        const exams = response.data?.data || [];
         
-        // Calculate statistics from exams data
-        const stats = [
+        console.log('Fetching stats for userId:', userId, 'route:', route);
+        
+        if (route === 2) {
+          // Teacher route - use teacher stats endpoint
+          const endpoint = `/marksheet/teacher/stats/${userId}`;
+          console.log('Making request to:', `${import.meta.env.VITE_BASE_API}${endpoint}`);
+          
+          const response = await api.get(endpoint);
+          console.log('Teacher stats response:', response);
+          console.log('Teacher stats data:', response.data);
+          
+          const teacherStats = response.data || [];
+          setStats(teacherStats);
+        } else {
+          // Student route (default) - use exams endpoint
+          const endpoint = `/marksheet/exams?user_id=${userId}`;
+          console.log('Making request to:', `${import.meta.env.VITE_BASE_API}${endpoint}`);
+          
+          const response = await api.get(endpoint);
+          console.log('Student exams response:', response);
+          
+          const exams = response.data?.data || [];
+          
+          // Calculate statistics from exams data
+          const stats = [
+            {
+              title: "TOTAL EXAMS",
+              value: exams.length,
+              subtitle: exams.length > 0 ? "Available" : "No data available",
+              color: "black"
+            },
+            {
+              title: "AVERAGE PERCENTAGE", 
+              value: exams.length > 0 
+                ? `${(exams.reduce((sum, exam) => sum + (exam.percentage || 0), 0) / exams.length).toFixed(1)}%`
+                : "0%",
+              subtitle: exams.length > 0 ? "Across all exams" : "No data available",
+              color: "black"
+            },
+            {
+              title: "BEST PERFORMANCE",
+              value: exams.length > 0 
+                ? `${Math.max(...exams.map(exam => exam.percentage || 0)).toFixed(1)}%`
+                : "N/A",
+              subtitle: exams.length > 0 ? "Highest score" : "No data available", 
+              color: "black"
+            },
+            {
+              title: "TOTAL SUBJECTS",
+              value: exams.length > 0 
+                ? exams.reduce((total, exam) => total + (exam.subjects?.length || 0), 0)
+                : 0,
+              subtitle: exams.length > 0 ? "Across all exams" : "No data available",
+              color: "black"
+            }
+          ];
+          
+          console.log('Student stats data:', stats);
+          setStats(stats);
+        }
+        
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching stats:', err);
+        console.error('Error response:', err.response);
+        console.error('Error status:', err.response?.status);
+        console.error('Error data:', err.response?.data);
+        
+        setError(`Failed to load statistics: ${err.response?.status} - ${err.response?.data?.detail || err.message}`);
+        
+        // Set fallback stats for both student and teacher
+        const fallbackStats = route === 2 ? [
+          {
+            title: "Total Students",
+            value: "0",
+            subtitle: "Unique students",
+            color: "blue"
+          },
+          {
+            title: "Average Performance",
+            value: "0%",
+            subtitle: "Across 0 exams",
+            color: "green"
+          },
+          {
+            title: "Total Exams Processed",
+            value: "0",
+            subtitle: "All student exams",
+            color: "purple"
+          },
+          {
+            title: "Success Rate",
+            value: "0%",
+            subtitle: "Students with ≥60%",
+            color: "orange"
+          }
+        ] : [
           {
             title: "TOTAL EXAMS",
-            value: exams.length,
-            subtitle: exams.length > 0 ? "Available" : "No data available",
+            value: 0,
+            subtitle: "No data available",
             color: "black"
           },
           {
             title: "AVERAGE PERCENTAGE", 
-            value: exams.length > 0 
-              ? `${(exams.reduce((sum, exam) => sum + (exam.percentage || 0), 0) / exams.length).toFixed(1)}%`
-              : "0%",
-            subtitle: exams.length > 0 ? "Across all exams" : "No data available",
+            value: "0%",
+            subtitle: "No data available",
             color: "black"
           },
           {
             title: "BEST PERFORMANCE",
-            value: exams.length > 0 
-              ? `${Math.max(...exams.map(exam => exam.percentage || 0)).toFixed(1)}%`
-              : "N/A",
-            subtitle: exams.length > 0 ? "Highest score" : "No data available", 
+            value: "N/A",
+            subtitle: "No data available", 
             color: "black"
           },
           {
             title: "TOTAL SUBJECTS",
-            value: exams.length > 0 
-              ? exams.reduce((total, exam) => total + (exam.subjects?.length || 0), 0)
-              : 0,
-            subtitle: exams.length > 0 ? "Across all exams" : "No data available",
+            value: 0,
+            subtitle: "No data available",
             color: "black"
           }
         ];
         
-        console.log('Stats data:', stats); // Debug log
-        setStats(stats);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching stats:', err);
-        setError('Failed to load statistics');
+        setStats(fallbackStats);
       } finally {
         setLoading(false);
       }
@@ -191,8 +289,11 @@ export const StatCardsContainer = ({ userId, route = 1 }) => {
 
     if (userId) {
       fetchStats();
+    } else {
+      console.log('No userId provided for stats fetch');
+      setLoading(false);
     }
-  }, [userId]);
+  }, [userId, route]);
 
   const getStatCardComponent = () => {
     const components = {
@@ -325,9 +426,31 @@ export const StatCardsDemo = ({ userId }) => {
         <div>
           <h2 className="text-xl font-bold mb-4 uppercase">Route 2: Centered Focus</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {stats.slice(0, 2).map((stat, index) => (
-              <StatCardRoute2 key={index} {...stat} />
-            ))}
+            {stats.slice(0, 4).map((stat, index) => {
+              // Map stat titles to appropriate icons for teacher stats (fallback if API doesn't provide icon)
+              const getIconForStat = (title, apiIcon) => {
+                // If API provides icon, use it directly
+                if (apiIcon && ['students', 'performance', 'exams', 'success', 'chart', 'percentage'].includes(apiIcon)) {
+                  return apiIcon === 'percentage' ? 'performance' : apiIcon;
+                }
+                
+                // Fallback to title-based mapping
+                const titleLower = (title || '').toLowerCase();
+                if (titleLower.includes('student')) return 'students';
+                if (titleLower.includes('performance') || titleLower.includes('average') || titleLower.includes('%')) return 'performance';
+                if (titleLower.includes('exam') || titleLower.includes('processed')) return 'exams';
+                if (titleLower.includes('success') || titleLower.includes('rate')) return 'success';
+                return 'chart';
+              };
+              
+              return (
+                <StatCardRoute2 
+                  key={index} 
+                  {...stat} 
+                  icon={getIconForStat(stat.title, stat.icon)}
+                />
+              );
+            })}
           </div>
         </div>
 

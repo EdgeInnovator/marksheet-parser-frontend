@@ -21,18 +21,22 @@ export default function TeacherCharts({ userId, role }) {
       const fetchStudents = async () => {
         try {
           console.log("Fetching students for teacher:", userId);
-          const response = await api.get(`/api/teacher/students?teacher_id=${userId}`);
+          // Use the new detailed teacher students endpoint
+          const response = await api.get(`/marksheet/teacher/students/${userId}`);
           console.log("Students API response:", response);
+          console.log("Students response data:", response.data);
           
-          const validation = validateStudentsResponse(response.data);
-          
-          if (validation.valid) {
-            console.log("Students data received:", validation.students);
-            setStudents(validation.students);
+          if (response.data?.students) {
+            const students = response.data.students;
+            console.log("Students data received:", students);
+            console.log("Total students:", response.data.total_students);
+            console.log("Registered count:", response.data.registered_count);
+            console.log("Unregistered count:", response.data.unregistered_count);
+            setStudents(students);
             
             // Auto-select first student if available
-            if (validation.students.length > 0) {
-              const firstStudentName = validation.students[0].student_name;
+            if (students.length > 0) {
+              const firstStudentName = students[0].name;
               setSelectedStudent(firstStudentName);
               console.log("Auto-selected student:", firstStudentName);
             } else {
@@ -40,14 +44,13 @@ export default function TeacherCharts({ userId, role }) {
               setSelectedStudent('');
             }
           } else {
-            console.error("Students validation failed:", validation.error);
+            console.error("No students data in response");
+            console.log("Full response structure:", response.data);
             setStudents([]);
             setSelectedStudent('');
           }
         } catch (error) {
           console.error("Error fetching students:", error);
-          const errorMessage = handleApiError(error);
-          console.error("API Error:", errorMessage);
           setStudents([]);
           setSelectedStudent('');
         }
@@ -64,12 +67,25 @@ export default function TeacherCharts({ userId, role }) {
         try {
           setLoading(true);
           console.log("Fetching data for student:", selectedStudent);
-          // Note: We need to use student name instead of ID for the API call
-          const response = await api.get(`/api/student/marksheets?student_name=${encodeURIComponent(selectedStudent)}`);
+          
+          // Find student ID from students array
+          const student = students.find(s => s.name === selectedStudent);
+          if (!student) {
+            console.error("Student not found in list");
+            return;
+          }
+          
+          // Use the new individual student data endpoint
+          if (!student.id || student.id === 'teacher') {
+            console.error('Invalid student ID:', student.id);
+            return;
+          }
+          
+          const response = await api.get(`/marksheet/${student.id}`);
           console.log("Student data response:", response);
           
-          if (response.data?.success && response.data?.data) {
-            setStudentData(response.data.data);
+          if (response.data?.marksheets) {
+            setStudentData(response.data);
           }
         } catch (error) {
           console.error("Error fetching student data:", error);
@@ -80,7 +96,7 @@ export default function TeacherCharts({ userId, role }) {
 
       fetchStudentData();
     }
-  }, [selectedStudent]);
+  }, [selectedStudent, students]);
 
   // Get all subjects from student data
   const getAllSubjects = useCallback(() => {
@@ -258,7 +274,7 @@ export default function TeacherCharts({ userId, role }) {
       {loading && <p>Loading...</p>}
       
       {/* Subject Performance Pie Chart */}
-      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mb-6">
+      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 mb-6">
         <h3 className="text-lg font-bold mb-4">Student Performance Analysis</h3>
         
         {/* Student Dropdown */}
@@ -271,8 +287,8 @@ export default function TeacherCharts({ userId, role }) {
           >
             {students.length > 0 ? (
               students.map((student, index) => (
-                <option key={index} value={student.student_name}>
-                  {student.student_name}
+                <option key={index} value={student.name}>
+                  {student.name}
                 </option>
               ))
             ) : (
@@ -346,7 +362,7 @@ export default function TeacherCharts({ userId, role }) {
       </div>
 
       {/* Overall Performance Radar Chart */}
-      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mb-6">
+      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 mb-6">
         <h3 className="text-lg font-bold mb-4">Student Overall Performance Analysis</h3>
         
         {/* Student Dropdown */}
@@ -359,8 +375,8 @@ export default function TeacherCharts({ userId, role }) {
           >
             {students.length > 0 ? (
               students.map((student, index) => (
-                <option key={index} value={student.student_name}>
-                  {student.student_name}
+                <option key={index} value={student.name}>
+                  {student.name}
                 </option>
               ))
             ) : (

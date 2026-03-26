@@ -16,15 +16,38 @@ export default function ViewMarksheetModal({ isOpen, onClose, filename }) {
   const fetchMarksheetData = async () => {
     setLoading(true);
     try {
-      const response = await api({
-        url: `/files/view/${filename}`,
-        method: 'GET'
-      });
+      // Try different possible endpoints for viewing files
+      let response;
+      
+      try {
+        // Try the current endpoint first
+        response = await api({
+          url: `/files/view/${filename}`,
+          method: 'GET'
+        });
+      } catch (fileError) {
+        console.log('Primary file view endpoint failed, trying alternative...');
+        // Try alternative endpoint
+        response = await api({
+          url: `/marksheet/files/view/${filename}`,
+          method: 'GET'
+        });
+      }
       
       setMarksheetData(response.data.data);
     } catch (error) {
       console.error('Error fetching marksheet data:', error);
-      toast.error('Failed to load marksheet details');
+      console.error('Filename being requested:', filename);
+      
+      // Don't show toast for this error since it's expected when files don't exist yet
+      // toast.error('Failed to load marksheet details');
+      
+      // Set a default message for missing files
+      setMarksheetData({ 
+        error: true, 
+        message: 'File not found or not yet processed',
+        filename: filename 
+      });
     } finally {
       setLoading(false);
     }
@@ -184,6 +207,21 @@ export default function ViewMarksheetModal({ isOpen, onClose, filename }) {
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="loading loading-spinner loading-lg text-[#b9f36a]"></div>
+          </div>
+        ) : marksheetData?.error ? (
+          <div className="text-center py-12">
+            <div className="mb-6">
+              <FileText size={64} className="mx-auto text-gray-400" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">File Not Found</h3>
+            <p className="text-gray-600 mb-4">{marksheetData.message}</p>
+            <p className="text-sm text-gray-500">Filename: <code className="bg-gray-100 px-2 py-1 rounded">{marksheetData.filename}</code></p>
+            <div className="mt-6 p-4 bg-yellow-50 border-2 border-yellow-200 rounded">
+              <p className="text-sm text-yellow-800">
+                <strong>Note:</strong> This file may still be processing or may not have been uploaded successfully.
+                Try uploading the file again or contact support if the issue persists.
+              </p>
+            </div>
           </div>
         ) : marksheetData ? (
           <div className="space-y-6">
