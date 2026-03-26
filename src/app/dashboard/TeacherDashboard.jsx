@@ -16,10 +16,8 @@ import {
 // Teacher-specific components
 import TeacherTable from "./TeacherTable";
 import { StatCardsContainer } from "../../components/StatCards";
-import StudentAssignmentManager from "./StudentAssignmentManager";
 
 // Chart components for teachers
-import TeacherCharts from "./charts/TeacherCharts";
 import TeacherAnalytics from "./charts/TeacherAnalytics";
 
 export default function TeacherDashboard() {
@@ -39,10 +37,15 @@ export default function TeacherDashboard() {
       if (activeUserCookie) {
         const userData = JSON.parse(activeUserCookie);
         console.log('Parsed user data structure:', userData);
-        console.log('User data keys:', Object.keys(userData));
-        console.log('User ID:', userData.id);
         console.log('User role:', userData.role);
         
+        // Final security check - ensure this is a staff user
+        if (userData.role !== 'staff') {
+          console.error('Non-staff user attempted to access teacher dashboard');
+          window.location.href = '/dashboard'; // Redirect back to general dashboard
+          return;
+        }
+
         if (userData.id) {
           setActiveUser(userData.id);
           console.log('Set activeUser to:', userData.id);
@@ -71,7 +74,19 @@ export default function TeacherDashboard() {
   const fetchTeacherSummary = async (teacherId) => {
     try {
       console.log('Fetching teacher summary for:', teacherId);
-      const response = await api.get(`/marksheet/teacher/summary/${teacherId}`);
+      let endpoint = `/marksheet/teacher/summary/${teacherId}`;
+      let response;
+      try {
+        response = await api.get(endpoint);
+      } catch (err) {
+        if (err.response?.status === 404) {
+          console.log('Teacher summary not found at primary endpoint, trying fallback /marksheet/staff/summary');
+          endpoint = `/marksheet/staff/summary/${teacherId}`;
+          response = await api.get(endpoint);
+        } else {
+          throw err;
+        }
+      }
       console.log('Teacher summary response:', response.data);
       setTeacherSummary(response.data);
     } catch (error) {
@@ -112,8 +127,8 @@ export default function TeacherDashboard() {
         formData.append('files', file);
       });
       
-      // Add teacher_id to help backend with store_parsed_result
-      formData.append('teacher_id', activeUser);
+      // Add staff_id to help backend with store_parsed_result
+      formData.append('staff_id', activeUser);
 
       const response = await api.post("/marksheet/upload-pdf-bulk", formData, {
         headers: {
@@ -200,18 +215,22 @@ export default function TeacherDashboard() {
     <div className="min-h-screen bg-[#b9f36a] text-black font-['IBM_Plex_Mono',monospace] flex flex-col">
       
       {/* Navbar */}
-      <Navbar userRole="teacher" />
+      <Navbar userRole="staff" />
 
       <main className="flex-1 px-[20px] sm:px-[40px] py-[20px] sm:py-[40px]">
 
         {/* Title */}
         <section className="mb-10">
-          <h1 className="text-[48px] sm:text-[64px] lg:text-[80px] leading-[0.9] font-extrabold">
-            DASH <br />BOARD<span>.</span>
-          </h1>
-          <p className="text-[16px] sm:text-[18px] lg:text-[20px] font-bold mt-4">
-            ANALYZE SMARTER.
-          </p>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div>
+              <h1 className="text-[48px] sm:text-[64px] lg:text-[80px] leading-[0.9] font-extrabold">
+                DASH <br />BOARD<span>.</span>
+              </h1>
+              <p className="text-[16px] sm:text-[18px] lg:text-[20px] font-bold mt-4">
+                ANALYZE SMARTER.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* Stats */}
@@ -260,36 +279,6 @@ export default function TeacherDashboard() {
             <div className="lg:col-span-2">
               <TeacherTable />
             </div>
-          </div>
-        </section>
-
-        {/* Student Assignment Management */}
-        <section className="mb-10">
-          <h2 className="text-[24px] sm:text-[32px] font-bold mb-6">STUDENT MANAGEMENT</h2>
-          {activeUser ? (
-            <StudentAssignmentManager teacherId={activeUser} />
-          ) : (
-            <div className="text-center py-8">
-              <p>Loading student management...</p>
-            </div>
-          )}
-        </section>
-
-        {/* Charts */}
-        <section className="mb-10">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-            <h2 className="text-[24px] sm:text-[32px] font-bold">CHARTS</h2>
-            <NavLink
-              to="/teacher-charts"
-              className="bg-black text-[#b9f36a] px-4 sm:px-6 py-2 sm:py-3 font-bold border-[2px] border-black hover:bg-[#b9f36a] hover:text-black transition-colors text-sm sm:text-base"
-            >
-              VIEW ALL CHARTS ↗
-            </NavLink>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Use TeacherCharts component with student dropdowns */}
-            <TeacherCharts userId={activeUser} role="teacher" />
           </div>
         </section>
 

@@ -2,10 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { api } from '../../config/axiosSetup';
 import { handleApiError, validateStudentsResponse, formatStudentOptions } from '../../utils/apiHelpers';
+import { getCokie } from '../../utils/utils';
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c'];
 
-export default function TeacherCharts({ userId, role }) {
+export default function TeacherCharts({ userId }) {
   const [students, setStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
@@ -14,9 +15,20 @@ export default function TeacherCharts({ userId, role }) {
   const [radarView, setRadarView] = useState('overall');
   const [loading, setLoading] = useState(false);
   const [studentData, setStudentData] = useState(null);
+  const [error, setError] = useState(null);
 
   // Fetch students for teacher
   useEffect(() => {
+    // Security check - ensure this is a staff user
+    const activeUser = getCokie('ACTIVE_USER');
+    const userData = activeUser ? JSON.parse(activeUser) : null;
+    
+    if (!userData || userData.role !== 'staff') {
+      console.error('Non-staff user attempted to access teacher charts');
+      setError('Access Denied: Staff only');
+      return;
+    }
+
     if (userId) {
       const fetchStudents = async () => {
         try {

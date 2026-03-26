@@ -38,12 +38,13 @@ export default function Dashboard({ userRole = "student" }) {
   }, [userRole]);
 
   // Route to appropriate dashboard based on user role
+  // Only two roles supported: "student" and "staff"
   if (currentRole === "student") {
     return <StudentDashboard />;
-  } else if (currentRole === "teacher" || currentRole === "staff") {
+  } else if (currentRole === "staff") {
     return <TeacherDashboard />;
   }
   
-  // Fallback to student dashboard
+  // Fallback to student dashboard for any unknown role
   return <StudentDashboard />;
 }

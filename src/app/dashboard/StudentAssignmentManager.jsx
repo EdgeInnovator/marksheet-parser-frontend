@@ -3,7 +3,7 @@ import { api } from '../config/axiosSetup';
 import { toast } from 'react-toastify';
 import { Plus, Trash2, Users, UserCheck, UserX } from 'lucide-react';
 
-export default function StudentAssignmentManager({ teacherId }) {
+export default function StudentAssignmentManager({ staffId }) {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -18,15 +18,15 @@ export default function StudentAssignmentManager({ teacherId }) {
   });
 
   useEffect(() => {
-    if (teacherId) {
+    if (staffId) {
       fetchAssignments();
     }
-  }, [teacherId]);
+  }, [staffId]);
 
   const fetchAssignments = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/marksheet/teacher/assignments/${teacherId}`);
+      const response = await api.get(`/marksheet/teacher/assignments/${staffId}`);
       if (response.data?.assignments) {
         setAssignments(response.data.assignments);
       }
@@ -42,7 +42,7 @@ export default function StudentAssignmentManager({ teacherId }) {
     e.preventDefault();
     try {
       const payload = {
-        teacher_id: teacherId,
+        teacher_id: staffId,
         ...newStudent
       };
 

@@ -171,8 +171,8 @@ export default function StudentDashboard() {
 
         {/* Stats */}
         <section className="mb-10">
-          <h2 className="text-[24px] sm:text-[32px] font-bold mb-6">PERFORMANCE OVERVIEW</h2>
-          <StatCardsContainer userId={activeUser} route={1} />
+          <h2 className="text-[24px] sm:text-[32px] font-bold mb-6">OVERVIEW<span>.</span></h2>
+          {activeUser && <StatCardsContainer userId={activeUser} route={1} />}
         </section>
 
         {/* Upload + Table */}

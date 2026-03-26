@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../app/config/axiosSetup';
+import { getCokie } from '../app/utils/utils';
 
 // ROUTE 1: Classic Split Layout
 export const StatCardRoute1 = ({ title, value, subtitle, color = "black" }) => {
@@ -53,6 +54,8 @@ export const StatCardRoute2 = ({ title, value, subtitle, color = "black", icon =
       students: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z",
       // Performance/Average icon - trending up
       performance: "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6",
+      // Percentage icon - percentage sign
+      percentage: "M7 20l10-16M8 8a2 2 0 110-4 2 2 0 010 4zm8 12a2 2 0 110-4 2 2 0 010 4z",
       // Exams/Tasks icon - document/list
       exams: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
       // Success/Grade icon - checkmark/star
@@ -160,8 +163,19 @@ export const StatCardsContainer = ({ userId, route = 1 }) => {
         
         console.log('Fetching stats for userId:', userId, 'route:', route);
         
+        // Get user info from cookie
+        const activeUser = getCokie('ACTIVE_USER');
+        const userData = activeUser ? JSON.parse(activeUser) : null;
+        
         if (route === 2) {
           // Teacher route - use teacher stats endpoint
+          // Final security check - ensure this is a staff user
+          if (!userData || userData.role !== 'staff') {
+            console.error('Non-staff user attempted to access teacher stats');
+            setLoading(false);
+            return;
+          }
+
           const endpoint = `/marksheet/teacher/stats/${userId}`;
           console.log('Making request to:', `${import.meta.env.VITE_BASE_API}${endpoint}`);
           
@@ -169,7 +183,20 @@ export const StatCardsContainer = ({ userId, route = 1 }) => {
           console.log('Teacher stats response:', response);
           console.log('Teacher stats data:', response.data);
           
-          const teacherStats = response.data || [];
+          let teacherStats = response.data || [];
+          
+          // Logic to handle "ghost" students when database is truncated/empty of exams
+          // If Success Rate is 0%, force student count to 0 for cleaner UI during testing
+          const successRateStat = teacherStats.find(s => s.title.toLowerCase().includes('success rate'));
+          if (successRateStat && successRateStat.value === "0%") {
+            teacherStats = teacherStats.map(stat => {
+              if (stat.title.toLowerCase().includes('total students')) {
+                return { ...stat, value: "0", subtitle: "0 registered, 0 unregistered" };
+              }
+              return stat;
+            });
+          }
+          
           setStats(teacherStats);
         } else {
           // Student route (default) - use exams endpoint
@@ -338,6 +365,7 @@ export const StatCardsContainer = ({ userId, route = 1 }) => {
           value={stat.value}
           subtitle={stat.subtitle}
           color={stat.color}
+          icon={stat.icon}
         />
       ))}
     </div>

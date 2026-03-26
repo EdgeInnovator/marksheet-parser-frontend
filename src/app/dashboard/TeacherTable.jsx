@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Download, Eye, Trash } from 'lucide-react';
 import { api } from '../config/axiosSetup';
 import { toast } from 'react-toastify';
@@ -13,25 +13,27 @@ export default function TeacherTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
+  const hasFetched = useRef(false);
 
-  const fetchUserUploads = async () => {
+  const fetchUserUploads = useCallback(async () => {
     try {
       // Get current user from cookies
       const activeUser = getCokie('ACTIVE_USER');
       const userData = activeUser ? JSON.parse(activeUser) : null;
-      const teacherId = userData?.id;
       
-      if (!teacherId) {
-        toast.error('User not authenticated');
+      if (!userData || userData.role !== 'staff') {
+        console.error('Non-staff user attempted to access teacher table');
         setLoading(false);
         return;
       }
       
-      // Use the uploaded-files endpoint for teachers
+      const teacherId = userData.id;
+      
+      // Use the uploaded-files endpoint for staff
       const response = await api({
         url: '/marksheet/uploaded-files',
         method: 'POST',
-        data: { user_id: teacherId }
+        data: { staff_id: teacherId }
       });
       
       // Set files directly from response (match StudentTable pattern)
@@ -43,7 +45,7 @@ export default function TeacherTable() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const handleDownload = async (filename) => {
     try {
@@ -116,6 +118,8 @@ export default function TeacherTable() {
   };
 
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     fetchUserUploads();
   }, []);
 
