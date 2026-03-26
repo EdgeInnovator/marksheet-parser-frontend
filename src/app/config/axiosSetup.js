@@ -2,9 +2,10 @@ import axios from "axios";
 import { getCokie } from "../utils/utils";
 
 export const api = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_BASE_API || 'http://localhost:8000',
   headers: {
     Accept: "application/json",
+    'Content-Type': 'application/json'
   },
 });
 

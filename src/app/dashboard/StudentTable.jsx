@@ -123,7 +123,7 @@ export default function StudentTable() {
 
   if (loading) {
     return (
-      <div className="col-span-2 bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+      <div className="col-span-2 bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200">
         <div className="border-b-[3px] border-black p-4 font-bold text-[11px] tracking-wide">
           MY RESULTS
         </div>
@@ -135,7 +135,7 @@ export default function StudentTable() {
   }
 
   return (
-    <div className="col-span-2 bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+    <div className="col-span-2 bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200">
       <div className="border-b-[3px] border-black p-4 font-bold text-[11px] tracking-wide flex justify-between items-center">
         <span>MY RESULTS</span>
         <button

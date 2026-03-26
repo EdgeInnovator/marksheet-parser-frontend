@@ -379,7 +379,7 @@ const StudentCharts = ({ fetchUploads }) => {
       {loading && <p>Loading...</p>}
       
       {/* Subject Performance Pie Chart */}
-      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mb-6">
+      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 mb-6">
         <h3 className="text-lg font-bold mb-4">Subject Performance Analysis</h3>
         
         {/* Subject Dropdown */}
@@ -438,7 +438,7 @@ const StudentCharts = ({ fetchUploads }) => {
       </div>
 
       {/* Overall Performance Radar Chart */}
-      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mb-6">
+      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 mb-6">
         <h3 className="text-lg font-bold mb-4">Overall Performance Analysis</h3>
         
         {/* Radar View Dropdown */}
@@ -526,7 +526,7 @@ const StudentCharts = ({ fetchUploads }) => {
 
       {/* FA Theory Marks Chart */}
       {/* FA Theory Marks Chart */}
-      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200">
         <h3 className="text-lg font-bold mb-4">FA Theory Marks</h3>
 
         <ResponsiveContainer width="100%" height={chartConfig.height}>
@@ -569,7 +569,7 @@ const StudentCharts = ({ fetchUploads }) => {
         </ResponsiveContainer>
       </div>
       {/* FA Practical Marks Chart */}
-      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200">
         <h3 className="text-lg font-bold mb-4">FA Practical Marks</h3>
         <ResponsiveContainer width="100%" height={chartConfig.height}>
           <BarChart data={faPracticalMarks} margin={chartConfig.margin}>
@@ -600,7 +600,7 @@ const StudentCharts = ({ fetchUploads }) => {
       </div>
 
       {/* SA Theory Marks Chart */}
-      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200">
         <h3 className="text-lg font-bold mb-4">SA Theory Marks</h3>
         <ResponsiveContainer width="100%" height={chartConfig.height}>
           <BarChart data={saTheoryMarks} margin={chartConfig.margin}>
@@ -638,7 +638,7 @@ const StudentCharts = ({ fetchUploads }) => {
       </div>
 
       {/* SA Practical Marks Chart */}
-      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+      <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200">
         <h3 className="text-lg font-bold mb-4">SA Practical Marks</h3>
         <ResponsiveContainer width="100%" height={chartConfig.height}>
           <BarChart data={saPracticalMarks} margin={chartConfig.margin}>

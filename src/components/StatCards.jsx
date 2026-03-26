@@ -3,22 +3,26 @@ import { api } from '../app/config/axiosSetup';
 
 // ROUTE 1: Classic Split Layout
 export const StatCardRoute1 = ({ title, value, subtitle, color = "black" }) => {
+  console.log('StatCard props:', { title, value, subtitle, color }); // Debug log
+  
   const getColorClasses = () => {
     const colors = {
-      black: 'border-black',
-      blue: 'border-blue-600',
-      green: 'border-green-600',
-      purple: 'border-purple-600',
-      orange: 'border-orange-600'
+      black: { border: 'border-black', bg: 'bg-black' },
+      blue: { border: 'border-blue-600', bg: 'bg-blue-600' },
+      green: { border: 'border-green-600', bg: 'bg-green-600' },
+      purple: { border: 'border-purple-600', bg: 'bg-purple-600' },
+      orange: { border: 'border-orange-600', bg: 'bg-orange-600' }
     };
     return colors[color] || colors.black;
   };
 
+  const colorClasses = getColorClasses();
+
   return (
-    <div className={`bg-white border-[4px] ${getColorClasses()} p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200`}>
+    <div className={`bg-white border-[4px] ${colorClasses.border} p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200`}>
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-lg font-bold uppercase">{title}</h3>
-        <div className="w-12 h-12 bg-black flex items-center justify-center">
+        <div className={`w-12 h-12 ${colorClasses.bg} flex items-center justify-center`}>
           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
@@ -137,8 +141,45 @@ export const StatCardsContainer = ({ userId, route = 1 }) => {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/marksheet/stats/${userId}`);
-        setStats(response.data);
+        const response = await api.get(`/marksheet/exams?user_id=${userId}`);
+        const exams = response.data?.data || [];
+        
+        // Calculate statistics from exams data
+        const stats = [
+          {
+            title: "TOTAL EXAMS",
+            value: exams.length,
+            subtitle: exams.length > 0 ? "Available" : "No data available",
+            color: "black"
+          },
+          {
+            title: "AVERAGE PERCENTAGE", 
+            value: exams.length > 0 
+              ? `${(exams.reduce((sum, exam) => sum + (exam.percentage || 0), 0) / exams.length).toFixed(1)}%`
+              : "0%",
+            subtitle: exams.length > 0 ? "Across all exams" : "No data available",
+            color: "black"
+          },
+          {
+            title: "BEST PERFORMANCE",
+            value: exams.length > 0 
+              ? `${Math.max(...exams.map(exam => exam.percentage || 0)).toFixed(1)}%`
+              : "N/A",
+            subtitle: exams.length > 0 ? "Highest score" : "No data available", 
+            color: "black"
+          },
+          {
+            title: "TOTAL SUBJECTS",
+            value: exams.length > 0 
+              ? exams.reduce((total, exam) => total + (exam.subjects?.length || 0), 0)
+              : 0,
+            subtitle: exams.length > 0 ? "Across all exams" : "No data available",
+            color: "black"
+          }
+        ];
+        
+        console.log('Stats data:', stats); // Debug log
+        setStats(stats);
         setError(null);
       } catch (err) {
         console.error('Error fetching stats:', err);
@@ -210,8 +251,44 @@ export const StatCardsDemo = ({ userId }) => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await api.get(`/marksheet/stats/${userId}`);
-        setStats(response.data);
+        const response = await api.get(`/marksheet/exams?user_id=${userId}`);
+        const exams = response.data?.data || [];
+        
+        // Calculate statistics from exams data
+        const stats = [
+          {
+            title: "TOTAL EXAMS",
+            value: exams.length,
+            subtitle: exams.length > 0 ? "Available" : "No data available",
+            color: "black"
+          },
+          {
+            title: "AVERAGE PERCENTAGE", 
+            value: exams.length > 0 
+              ? `${(exams.reduce((sum, exam) => sum + (exam.percentage || 0), 0) / exams.length).toFixed(1)}%`
+              : "0%",
+            subtitle: exams.length > 0 ? "Across all exams" : "No data available",
+            color: "black"
+          },
+          {
+            title: "BEST PERFORMANCE",
+            value: exams.length > 0 
+              ? `${Math.max(...exams.map(exam => exam.percentage || 0)).toFixed(1)}%`
+              : "N/A",
+            subtitle: exams.length > 0 ? "Highest score" : "No data available", 
+            color: "black"
+          },
+          {
+            title: "TOTAL SUBJECTS",
+            value: exams.length > 0 
+              ? exams.reduce((total, exam) => total + (exam.subjects?.length || 0), 0)
+              : 0,
+            subtitle: exams.length > 0 ? "Across all exams" : "No data available",
+            color: "black"
+          }
+        ];
+        
+        setStats(stats);
       } catch (err) {
         console.error('Error fetching stats:', err);
       } finally {

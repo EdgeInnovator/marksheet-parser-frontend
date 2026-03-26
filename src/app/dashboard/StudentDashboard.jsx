@@ -17,9 +17,8 @@ import {
 } from "../utils/apiHelpers";
 
 // Student-specific components
-import StudentStats from "./StudentStats";
 import StudentTable from "./StudentTable";
-
+import { StatCardsContainer } from "../../components/StatCards";
 // Individual chart components from charts folder
 import FATheoryChart from "./charts/FATheoryChart";
 import FAPracticalChart from "./charts/FAPracticalChart";
@@ -171,14 +170,15 @@ export default function StudentDashboard() {
         </section>
 
         {/* Stats */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
-          <StudentStats activeUser={activeUser} />
+        <section className="mb-10">
+          <h2 className="text-[24px] sm:text-[32px] font-bold mb-6">PERFORMANCE OVERVIEW</h2>
+          <StatCardsContainer userId={activeUser} route={1} />
         </section>
 
         {/* Upload + Table */}
         <section className="mb-10">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="bg-white p-6 sm:p-8 lg:p-10 border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center">
+            <div className="bg-white p-6 sm:p-8 lg:p-10 border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 flex flex-col items-center">
               <FileUpload
                 onFileSelect={handleFileSelect}
                 disabled={isUploading || isParsing}
@@ -188,7 +188,7 @@ export default function StudentDashboard() {
                 <button
                   onClick={handleUpload}
                   disabled={isUploading}
-                  className="mt-4 w-full bg-black text-[#b9f36a] px-4 py-3 sm:px-6 font-bold border-[2px] border-black text-sm sm:text-base"
+                  className="mt-4 w-full bg-black text-[#b9f36a] px-4 py-3 sm:px-6 font-bold border-[2px] border-black text-sm sm:text-base shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all duration-200"
                 >
                   {isUploading ? "UPLOADING..." : "UPLOAD MARKSHEET"}
                 </button>
@@ -198,7 +198,7 @@ export default function StudentDashboard() {
                 <button
                   onClick={handleParse}
                   disabled={isParsing}
-                  className="mt-4 w-full bg-blue-600 text-white px-4 py-3 sm:px-6 font-bold text-sm sm:text-base"
+                  className="mt-4 w-full bg-blue-600 text-white px-4 py-3 sm:px-6 font-bold text-sm sm:text-base shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all duration-200"
                 >
                   {isParsing ? "PARSING..." : "PARSE MARKSHEET"}
                 </button>
