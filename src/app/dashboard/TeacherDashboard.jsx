@@ -17,9 +17,6 @@ import {
 import TeacherTable from "./TeacherTable";
 import { StatCardsContainer } from "../../components/StatCards";
 
-// Chart components for teachers
-import TeacherAnalytics from "./charts/TeacherAnalytics";
-
 export default function TeacherDashboard() {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -27,7 +24,6 @@ export default function TeacherDashboard() {
   const [isParsing, setIsParsing] = useState(false);
   const [activeUser, setActiveUser] = useState(null);
   const [teacherSummary, setTeacherSummary] = useState(null);
-  const [showAnalytics, setShowAnalytics] = useState(false);
 
   useEffect(() => {
     try {
@@ -235,7 +231,7 @@ export default function TeacherDashboard() {
 
         {/* Stats */}
         <section className="mb-10">
-          <h2 className="text-[24px] sm:text-[32px] font-bold mb-6">TEACHER ANALYTICS</h2>
+          <h2 className="text-[24px] sm:text-[32px] font-bold mb-6 uppercase">Overview Analytics<span>.</span></h2>
           {activeUser ? (
             <StatCardsContainer userId={activeUser} route={2} />
           ) : (
@@ -284,19 +280,20 @@ export default function TeacherDashboard() {
 
         {/* Advanced Analytics */}
         <section className="mb-10">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-            <h2 className="text-[24px] sm:text-[32px] font-bold">ADVANCED ANALYTICS</h2>
-            <button
-              onClick={() => setShowAnalytics(!showAnalytics)}
-              className="bg-black text-[#b9f36a] px-4 sm:px-6 py-2 sm:py-3 font-bold border-[2px] border-black hover:bg-[#b9f36a] hover:text-black transition-colors text-sm sm:text-base"
+          <div className="bg-white border-[3px] border-black p-8 sm:p-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="flex-1">
+              <h2 className="text-[28px] sm:text-[36px] font-black uppercase mb-4">Advanced Analytics<span>.</span></h2>
+              <p className="text-[16px] font-bold text-gray-700 uppercase">
+                Explore deep insights, class distribution, radar charts, and individual student progress trends in our dedicated analytics suite.
+              </p>
+            </div>
+            <NavLink
+              to="/teacher-analytics"
+              className="bg-[#b9f36a] text-black px-8 py-4 font-black text-lg uppercase border-[3px] border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[6px] hover:translate-y-[6px] transition-all whitespace-nowrap"
             >
-              {showAnalytics ? 'HIDE ANALYTICS' : 'SHOW ANALYTICS'}
-            </button>
+              Open Analytics ↗
+            </NavLink>
           </div>
-          
-          {showAnalytics && activeUser && (
-            <TeacherAnalytics userId={activeUser} />
-          )}
         </section>
 
       </main>

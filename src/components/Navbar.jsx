@@ -13,6 +13,9 @@ const Navbar = ({ userRole = "student" }) => {
         {userRole === "student" && (
           <NavLink to="/student-charts">CHARTS</NavLink>
         )}
+        {userRole === "staff" && (
+          <NavLink to="/teacher-analytics">ANALYTICS</NavLink>
+        )}
         <NavLink to="/about-us">ABOUT US</NavLink>
         <NavLink to="/logout">LOGOUT</NavLink>
       </nav>

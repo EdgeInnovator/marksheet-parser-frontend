@@ -29,6 +29,9 @@ export default function TeacherAnalytics({ userId }) {
     examination: ''
   });
   const [students, setStudents] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [topPerformers, setTopPerformers] = useState([]);
+  const [bottomPerformers, setBottomPerformers] = useState([]);
   const [selectedEnrollment, setSelectedEnrollment] = useState('');
   
   // Loading states
@@ -75,6 +78,50 @@ export default function TeacherAnalytics({ userId }) {
       initData();
     }
   }, [userId]);
+
+  // Handle filtering students when global filters change
+  useEffect(() => {
+    if (students.length > 0) {
+      const filtered = students.filter(student => {
+        const matchSemester = !selectedFilters.semester || 
+          student.semester === selectedFilters.semester || 
+          student.latest_exam?.semester === selectedFilters.semester;
+        
+        const matchCourse = !selectedFilters.course || 
+          student.course === selectedFilters.course || 
+          student.latest_exam?.course === selectedFilters.course;
+          
+        const matchExam = !selectedFilters.examination || 
+          student.examination === selectedFilters.examination || 
+          student.latest_exam?.exam_name === selectedFilters.examination;
+
+        return matchSemester && matchCourse && matchExam;
+      });
+
+      setFilteredStudents(filtered);
+
+      // Sort and derive Top/Bottom performers from the filtered list
+      const studentsWithScores = filtered
+        .filter(s => s.latest_exam?.total_marks_obtained !== undefined)
+        .sort((a, b) => (b.latest_exam?.total_marks_obtained || 0) - (a.latest_exam?.total_marks_obtained || 0));
+
+      setTopPerformers(studentsWithScores.slice(0, 5));
+      setBottomPerformers([...studentsWithScores].reverse().slice(0, 5));
+
+      // Auto-select the first student in the filtered list if current selection is not in it
+      if (filtered.length > 0) {
+        const currentStillValid = filtered.some(s => s.enrollment_no === selectedEnrollment);
+        if (!currentStillValid) {
+          const firstFiltered = filtered[0];
+          setSelectedEnrollment(firstFiltered.enrollment_no || '');
+          fetchSemesterProgress(firstFiltered.enrollment_no);
+        }
+      } else {
+        setSelectedEnrollment('');
+        setSemesterProgress(null);
+      }
+    }
+  }, [selectedFilters.semester, selectedFilters.course, selectedFilters.examination, students]);
 
   // Fetch dynamic analytics when filters change
   useEffect(() => {
@@ -349,12 +396,15 @@ export default function TeacherAnalytics({ userId }) {
             <h3 className="text-xl font-bold">Student Progress</h3>
             <select 
               value={selectedEnrollment} 
-              onChange={(e) => setSelectedEnrollment(e.target.value)}
+              onChange={(e) => {
+                setSelectedEnrollment(e.target.value);
+                fetchSemesterProgress(e.target.value);
+              }}
               className="bg-white border-2 border-black px-4 py-2 font-bold focus:outline-none focus:ring-2 focus:ring-[#b9f36a] appearance-none min-w-[200px]"
               style={{ backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'3\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1em' }}
             >
               <option value="">Select Student</option>
-              {students.map(s => (
+              {filteredStudents.map(s => (
                 <option key={s.enrollment_no} value={s.enrollment_no}>{s.name}</option>
               ))}
             </select>
@@ -394,42 +444,48 @@ export default function TeacherAnalytics({ userId }) {
       </div>
 
       {/* Top/Bottom Students */}
-      {topBottomStudents && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200">
-            <h3 className="text-lg font-bold mb-4 text-green-600 flex items-center gap-2">
-              <span className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">↑</span>
-              Top Performers
-            </h3>
-            <ul className="space-y-3">
-              {(topBottomStudents.top || []).map((student, idx) => (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200">
+          <h3 className="text-lg font-bold mb-4 text-green-600 flex items-center gap-2">
+            <span className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">↑</span>
+            Top Performers
+          </h3>
+          <ul className="space-y-3">
+            {topPerformers.length > 0 ? (
+              topPerformers.map((student, idx) => (
                 <li key={idx} className="flex justify-between items-center p-3 bg-green-50 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                   <span className="font-bold flex items-center gap-2">
                     <span className="w-6 h-6 bg-black text-[#b9f36a] border-2 border-black flex items-center justify-center text-xs font-black">{idx + 1}</span>
                     {student.name}
                   </span>
-                  <span className="text-black font-black">{student.score}</span>
+                  <span className="text-black font-black">{student.latest_exam?.total_marks_obtained}</span>
                 </li>
-              ))}
-            </ul>
-          </div>
+              ))
+            ) : (
+              <li className="text-center py-4 text-gray-500 font-bold">No student data for current filters</li>
+            )}
+          </ul>
+        </div>
 
-          <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200">
-            <h3 className="text-lg font-bold mb-4 text-orange-600 flex items-center gap-2">
-              <span className="w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">↓</span>
-              Students Needing Support
-            </h3>
-            <ul className="space-y-3">
-              {(topBottomStudents.bottom || []).map((student, idx) => (
+        <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-200">
+          <h3 className="text-lg font-bold mb-4 text-orange-600 flex items-center gap-2">
+            <span className="w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">↓</span>
+            Students Needing Support
+          </h3>
+          <ul className="space-y-3">
+            {bottomPerformers.length > 0 ? (
+              bottomPerformers.map((student, idx) => (
                 <li key={idx} className="flex justify-between items-center p-3 bg-orange-50 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                   <span className="font-bold">{student.name}</span>
-                  <span className="text-black font-black">{student.score}</span>
+                  <span className="text-black font-black">{student.latest_exam?.total_marks_obtained}</span>
                 </li>
-              ))}
-            </ul>
-          </div>
+              ))
+            ) : (
+              <li className="text-center py-4 text-gray-500 font-bold">No student data for current filters</li>
+            )}
+          </ul>
         </div>
-      )}
+      </div>
 
       {/* Subject Weakness Detection */}
       {weaknessData && weaknessData.length > 0 && (
