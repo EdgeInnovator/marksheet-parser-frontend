@@ -36,40 +36,58 @@ export default function About() {
         </section>
 
         {/* Team Grid */}
-        <section className="grid grid-cols-3 gap-8 mb-10">
+        <section className="grid grid-cols-4 gap-8 mb-10">
           {/* Team Member 1 */}
           <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-            <div className="w-full h-48 bg-gray-200 mb-4 border-2 border-dashed border-gray-400 flex items-center justify-center">
-              <span className="text-gray-500 text-[14px]">Photo</span>
-            </div>
-            <h3 className="text-[18px] font-bold mb-2">John Doe</h3>
-            <p className="text-[12px] text-gray-600 mb-3">Lead Developer</p>
+            <img 
+              src="/src/assets/teamPhoto.jpg" 
+              alt="Soumya Dedhia" 
+              className="w-full h-48 object-cover mb-4 border-2 border-black"
+            />
+            <h3 className="text-[18px] font-bold mb-2">Soumya Dedhia</h3>
+            <p className="text-[12px] text-gray-600 mb-3">Forever Student of Technology</p>
             <p className="text-[11px] leading-[1.5]">
-              Full-stack developer with expertise in React and Python. Passionate about creating intuitive user experiences.
+              Final Year Diploma in Computer Engineering Student.
             </p>
           </div>
 
           {/* Team Member 2 */}
           <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-            <div className="w-full h-48 bg-gray-200 mb-4 border-2 border-dashed border-gray-400 flex items-center justify-center">
-              <span className="text-gray-500 text-[14px]">Photo</span>
-            </div>
-            <h3 className="text-[18px] font-bold mb-2">Jane Smith</h3>
-            <p className="text-[12px] text-gray-600 mb-3">Backend Engineer</p>
+            <img 
+              src="/src/assets/teamPhoto.jpg" 
+              alt="Rutraj Vishwamitre" 
+              className="w-full h-48 object-cover mb-4 border-2 border-black"
+            />
+            <h3 className="text-[18px] font-bold mb-2">Rutraj Vishwamitre</h3>
+            <p className="text-[12px] text-gray-600 mb-3">Backend Parsing Technology</p>
             <p className="text-[11px] leading-[1.5]">
-              Specialized in API design and database architecture. Ensures robust and scalable backend solutions.
+              implemented parsing logic and integration of parser with frontend.
             </p>
           </div>
 
           {/* Team Member 3 */}
           <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-            <div className="w-full h-48 bg-gray-200 mb-4 border-2 border-dashed border-gray-400 flex items-center justify-center">
-              <span className="text-gray-500 text-[14px]">Photo</span>
-            </div>
-            <h3 className="text-[18px] font-bold mb-2">Mike Johnson</h3>
-            <p className="text-[12px] text-gray-600 mb-3">UI/UX Designer</p>
+            <img 
+              src="/src/assets/teamPhoto.jpg" 
+              alt="Ayush Gurav" 
+              className="w-full h-48 object-cover mb-4 border-2 border-black"
+            />
+            <h3 className="text-[18px] font-bold mb-2">Ayush Gurav</h3>
+            <p className="text-[12px] text-gray-600 mb-3">Backend Developer</p>
             <p className="text-[11px] leading-[1.5]">
-              Creative designer focused on user-centered design. Brings clarity and beauty to complex interfaces.
+              Implemented backend logic and integration of parser with frontend.
+            </p>
+          </div>
+          <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+            <img 
+              src="/src/assets/teamPhoto.jpg" 
+              alt="Alark Mahatre" 
+              className="w-full h-48 object-cover mb-4 border-2 border-black"
+            />
+            <h3 className="text-[18px] font-bold mb-2">Alark Mahatre</h3>
+            <p className="text-[12px] text-gray-600 mb-3">Student</p>
+            <p className="text-[11px] leading-[1.5]">
+              Documentation 
             </p>
           </div>
         </section>
@@ -104,24 +122,7 @@ export default function About() {
         </section>
 
         {/* Stats Section */}
-        <section className="grid grid-cols-4 gap-8 mb-10">
-          <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center">
-            <p className="text-[32px] font-bold">10K+</p>
-            <p className="text-[11px] font-bold tracking-wide mt-2">USERS</p>
-          </div>
-          <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center">
-            <p className="text-[32px] font-bold">50K+</p>
-            <p className="text-[11px] font-bold tracking-wide mt-2">SHEETS PARSED</p>
-          </div>
-          <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center">
-            <p className="text-[32px] font-bold">99.9%</p>
-            <p className="text-[11px] font-bold tracking-wide mt-2">ACCURACY</p>
-          </div>
-          <div className="bg-white border-[3px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center">
-            <p className="text-[32px] font-bold">24/7</p>
-            <p className="text-[11px] font-bold tracking-wide mt-2">SUPPORT</p>
-          </div>
-        </section>
+        
       </main>
 
       {/* Footer */}

@@ -338,13 +338,34 @@ export default function TeacherAnalytics({ userId }) {
           ) : histogramData ? (
             <>
               <div className="flex-1">
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={histogramData.bins}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="label" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="#b9f36a" stroke="#000" strokeWidth={2} />
+                <ResponsiveContainer width="100%" height={300} key={`histogram-${histogramData.total_exams}`}>
+                  <BarChart 
+                    data={histogramData.bins}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                    <XAxis 
+                      dataKey="label" 
+                      tick={{ fontSize: 12, fill: '#666' }}
+                      axisLine={{ stroke: '#666' }}
+                    />
+                    <YAxis 
+                      domain={[0, 'dataMax']}
+                      tick={{ fontSize: 12, fill: '#666' }}
+                      axisLine={{ stroke: '#666' }}
+                      label={{ value: 'Number of Students', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#666' } }}
+                    />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#fff', border: '2px solid #000', borderRadius: '0' }}
+                      labelStyle={{ fontWeight: 'bold' }}
+                    />
+                    <Bar 
+                      dataKey="count" 
+                      fill="#b9f36a" 
+                      stroke="#000" 
+                      strokeWidth={2}
+                      radius={[0, 0, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
